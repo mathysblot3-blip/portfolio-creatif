@@ -16,17 +16,17 @@ export const REGLAGES = {
   camera: {
     fov: 22,          // angle de vue vertical en degrés. Petit = longue focale, peu de déformation
     distance: 35,     // distance entre la caméra et le personnage, en unités
-    inclinaison: 15,  // hauteur de la caméra : angle au-dessus du sol, vu depuis le personnage
-    visee: 9,         // angle de plongée de la caméra. Plus petit que l'inclinaison = perso plus bas à l'écran, plus de ciel
+    inclinaison: 30,  // hauteur de la caméra : angle au-dessus du sol, vu depuis le personnage
+    visee: 27,        // angle de plongée de la caméra. Plus petit que l'inclinaison = perso plus bas à l'écran, plus de ciel
     amorti: 4,        // vitesse du suivi. Grand = caméra nerveuse, petit = caméra molle
     avance: 1.5,      // la caméra regarde un peu devant le perso, dans le sens de la marche (en unités)
   },
 
   flou: {
-    zoneAvant: 4,     // distance devant le perso qui reste nette (en unités)
-    zoneArriere: 12,  // distance derrière le perso qui reste nette
-    transition: 12,   // distance sur laquelle le flou monte de zéro à son maximum
-    rayonMax: 0.012,  // taille maximale du flou, en fraction de la hauteur de l'écran
+    zoneAvant: 3,     // distance devant le perso qui reste nette (en unités)
+    zoneArriere: 10,  // distance derrière le perso qui reste nette
+    transition: 8,    // distance sur laquelle le flou monte de zéro à son maximum
+    rayonMax: 0.02,   // taille maximale du flou, en fraction de la hauteur de l'écran
   },
 
   bloom: {
@@ -46,10 +46,10 @@ export const REGLAGES = {
   },
 
   image: {
-    exposition: 1.0,
-    saturation: 1.08,
+    exposition: 0.9,
+    saturation: 1.1,
     chaleur: 0.05,    // 0 = neutre. Positif = image plus dorée
-    vignette: 0.35,   // assombrissement des coins de l'écran
+    vignette: 0.65,   // assombrissement des coins de l'écran
   },
 
   brume: {
