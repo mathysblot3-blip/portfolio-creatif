@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Le Quartier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Press+Start+2P&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/ui/style.css">
+</head>
+<body>
+  <!-- La scène 3D est dessinée dans cette toile -->
+  <canvas id="vue"></canvas>
+
+  <!-- Bandeau provisoire du jour 1 : il disparaîtra quand le vrai HUD sera en place -->
+  <div id="cartouche"><b>CALIBRAGE</b><span>JOUR 1 · RENDU HD-2D</span></div>
+  <div id="compteur">-- i/s</div>
+  <div id="aide">ZQSD / FLECHES : SE DEPLACER<br>PANNEAU A DROITE : REGLAGES</div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

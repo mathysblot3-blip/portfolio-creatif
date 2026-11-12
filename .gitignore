@@ -1,0 +1,19 @@
+# Dépendances installées par npm (se régénèrent avec "npm install")
+node_modules/
+
+# Site compilé par Vite (se régénère avec "npm run build")
+dist/
+
+# Captures d'Octopath Traveler : référence privée, jamais publiée
+reference/
+
+# Fichiers bruts générés par IA avant post-traitement
+assets/_raw/
+
+# Fichiers temporaires
+*.log
+.DS_Store
+Thumbs.db
+
+# Réglages locaux de l'application Claude
+.claude/
