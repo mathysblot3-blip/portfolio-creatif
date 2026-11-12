@@ -144,6 +144,104 @@ export const TEX = {
     g.fillStyle = '#6f8fb0'; g.fillRect(4, 4, 10, 12);
     g.fillStyle = '#3e271a'; g.fillRect(15, 3, 2, h - 6); g.fillRect(3, 19, l - 6, 2);
   }, { repetable: false }),
+
+  // Mur de briques : briques de 16 × 8 px en quinconce
+  brique: (couleur, graine) => texturePixel(64, 64, (g, l, h) => {
+    g.fillStyle = nuance(couleur, 0.5); g.fillRect(0, 0, l, h);
+    const r = alea(graine);
+    for (let y = 0; y < h; y += 8) {
+      const decalage = (y / 8) % 2 ? 8 : 0;
+      for (let x = -16; x < l; x += 16) {
+        const c = nuance(couleur, 0.8 + r() * 0.4);
+        g.fillStyle = c; g.fillRect(x + decalage, y, 15, 7);
+        g.fillStyle = nuance(c, 1.2); g.fillRect(x + decalage, y, 15, 1);
+      }
+    }
+  }),
+
+  // Mur en pierre de taille : gros blocs de 32 × 16 px
+  pierreTaillee: (couleur, graine) => texturePixel(64, 64, (g, l, h) => {
+    bruit(g, l, h, couleur, 0.12, graine, 0.5);
+    const r = alea(graine + 3);
+    for (let y = 0; y < h; y += 16) {
+      const decalage = (y / 16) % 2 ? 16 : 0;
+      for (let x = -32; x < l; x += 32) {
+        g.fillStyle = nuance(couleur, 0.9 + r() * 0.2); g.fillRect(x + decalage + 1, y + 1, 30, 14);
+        g.fillStyle = nuance(couleur, 1.15); g.fillRect(x + decalage + 1, y + 1, 30, 1);
+        g.fillStyle = nuance(couleur, 0.6); g.fillRect(x + decalage, y + 15, 32, 1); g.fillRect(x + decalage, y, 1, 16);
+      }
+    }
+  }),
+
+  // Eau de la fontaine
+  eau: () => texturePixel(32, 32, (g, l, h) => {
+    bruit(g, l, h, '#2f5a9e', 0.25, 13, 0.5);
+    g.fillStyle = '#86c0e4';
+    [[5, 6, 6], [19, 12, 7], [9, 22, 5], [24, 27, 5]].forEach(([x, y, n]) => g.fillRect(x, y, n, 1));
+  }),
+
+  // Toile rayée de l'auvent du Comptoir
+  auvent: (couleur) => texturePixel(32, 32, (g, l, h) => {
+    for (let x = 0; x < l; x += 8) {
+      g.fillStyle = (x / 8) % 2 ? '#f4ecd8' : couleur;
+      g.fillRect(x, 0, 8, h);
+    }
+    g.fillStyle = 'rgba(20,16,26,0.25)'; g.fillRect(0, h - 3, l, 3);
+  }),
+
+  // Cadran d'horloge de l'Académie
+  horloge: () => texturePixel(32, 32, (g) => {
+    g.fillStyle = '#4a3f52'; g.beginPath(); g.arc(16, 16, 15, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#f4ecd8'; g.beginPath(); g.arc(16, 16, 12, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#14101a';
+    [[15, 5], [15, 25], [5, 15], [25, 15]].forEach(([x, y]) => g.fillRect(x, y, 2, 2));
+    g.fillRect(15, 9, 2, 8); g.fillRect(15, 15, 7, 2);
+  }, { repetable: false }),
+
+  // Vitrine de l'Atelier : trois silhouettes de mannequins
+  vitrine: () => texturePixel(64, 48, (g, l, h) => {
+    g.fillStyle = '#2b2433'; g.fillRect(0, 0, l, h);
+    g.fillStyle = '#fbe6cc'; g.fillRect(2, 2, l - 4, h - 4);
+    [[14, '#9a62c4'], [32, '#e0507a'], [50, '#432664']].forEach(([x, robe]) => {
+      g.fillStyle = '#b9ab9f'; g.fillRect(x - 2, 8, 4, 4);          // tête du mannequin
+      g.fillStyle = robe; g.fillRect(x - 5, 12, 10, 12); g.fillRect(x - 7, 24, 14, 10); // robe
+      g.fillStyle = '#4a3f52'; g.fillRect(x, 34, 1, 9); g.fillRect(x - 4, 43, 9, 1);     // pied
+    });
+    g.fillStyle = '#2b2433'; g.fillRect(l / 2 - 1, 2, 2, h - 4);
+  }, { repetable: false }),
+
+  // Face avant d'une enceinte du Studio
+  enceinte: () => texturePixel(24, 36, (g, l, h) => {
+    g.fillStyle = '#14101a'; g.fillRect(0, 0, l, h);
+    g.fillStyle = '#2b2433'; g.fillRect(1, 1, l - 2, h - 2);
+    g.fillStyle = '#4a3f52'; g.beginPath(); g.arc(12, 24, 8, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(12, 8, 4, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#14101a'; g.beginPath(); g.arc(12, 24, 4, 0, Math.PI * 2); g.fill();
+  }, { repetable: false }),
+
+  // Bannière de l'Arène
+  banniere: (couleur) => texturePixel(16, 48, (g, l, h) => {
+    g.fillStyle = couleur; g.fillRect(0, 0, l, h - 6);
+    g.fillRect(0, h - 6, 5, 6); g.fillRect(11, h - 6, 5, 6); // bas découpé en deux pointes
+    g.fillStyle = '#f8dc78'; g.fillRect(0, 0, l, 2); g.fillRect(5, 14, 6, 6); g.fillRect(7, 20, 2, 8);
+  }, { repetable: false }),
+
+  // Blason suspendu : repère coloré de chaque lieu
+  blason: (couleur) => texturePixel(16, 20, (g) => {
+    g.fillStyle = '#14101a'; g.fillRect(1, 0, 14, 14); g.fillRect(3, 14, 10, 3); g.fillRect(5, 17, 6, 2);
+    g.fillStyle = couleur; g.fillRect(2, 1, 12, 12); g.fillRect(4, 13, 8, 3); g.fillRect(6, 16, 4, 2);
+    g.fillStyle = '#f4ecd8'; g.fillRect(6, 4, 4, 6);
+  }, { repetable: false }),
+
+  // Enseigne avec le nom du lieu. La police pixel est chargée au démarrage (voir main.js).
+  enseigne: (texte, couleur) => texturePixel(128, 24, (g, l, h) => {
+    g.fillStyle = '#2a1a14'; g.fillRect(0, 0, l, h);
+    g.fillStyle = couleur; g.fillRect(2, 2, l - 4, h - 4);
+    g.fillStyle = '#14101a'; g.fillRect(4, 4, l - 8, h - 8);
+    g.fillStyle = '#f4ecd8'; g.font = '8px "Press Start 2P", monospace';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(texte, l / 2, h / 2 + 1);
+  }, { repetable: false }),
 };
 
 // Dégradé du ciel de fin d'après-midi (du haut vers l'horizon). Lissé volontairement : ce n'est pas du pixel art.

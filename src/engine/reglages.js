@@ -15,7 +15,7 @@ export const REGLAGES = {
 
   camera: {
     fov: 22,          // angle de vue vertical en degrés. Petit = longue focale, peu de déformation
-    distance: 35,     // distance entre la caméra et le personnage, en unités
+    distance: 32,    // distance entre la caméra et le personnage, en unités
     inclinaison: 30,  // hauteur de la caméra : angle au-dessus du sol, vu depuis le personnage
     visee: 27,        // angle de plongée de la caméra. Plus petit que l'inclinaison = perso plus bas à l'écran, plus de ciel
     amorti: 4,        // vitesse du suivi. Grand = caméra nerveuse, petit = caméra molle
@@ -24,8 +24,8 @@ export const REGLAGES = {
 
   flou: {
     zoneAvant: 3,     // distance devant le perso qui reste nette (en unités)
-    zoneArriere: 10,  // distance derrière le perso qui reste nette
-    transition: 8,    // distance sur laquelle le flou monte de zéro à son maximum
+    zoneArriere: 16,  // distance derrière le perso qui reste nette
+    transition: 10,   // distance sur laquelle le flou monte de zéro à son maximum
     rayonMax: 0.02,   // taille maximale du flou, en fraction de la hauteur de l'écran
   },
 
@@ -36,12 +36,12 @@ export const REGLAGES = {
   },
 
   lumiere: {
-    soleilIntensite: 3.0,
+    soleilIntensite: 3.6,
     soleilCouleur: '#ffd7a0',
     soleilAzimut: -40,   // direction du soleil en degrés : négatif = il vient de la gauche
     soleilHauteur: 30,   // hauteur du soleil au-dessus de l'horizon. Bas = ombres longues
-    cielIntensite: 1.1,
-    cielCouleur: '#cfe0ff', // lumière d'ambiance venant du ciel (teinte les zones à l'ombre)
+    cielIntensite: 0.7,
+    cielCouleur: '#b8c8ff', // lumière d'ambiance venant du ciel (teinte les zones à l'ombre)
     solCouleur: '#b98a5e',  // lumière d'ambiance renvoyée par le sol
   },
 

@@ -13,10 +13,12 @@
   <!-- La scène 3D est dessinée dans cette toile -->
   <canvas id="vue"></canvas>
 
-  <!-- Bandeau provisoire du jour 1 : il disparaîtra quand le vrai HUD sera en place -->
-  <div id="cartouche"><b>CALIBRAGE</b><span>JOUR 1 · RENDU HD-2D</span></div>
-  <div id="compteur">-- i/s</div>
-  <div id="aide">ZQSD / FLECHES : SE DEPLACER<br>PANNEAU A DROITE : REGLAGES</div>
+  <!-- Interface posée par-dessus la scène -->
+  <div id="cartouche"><b>LE QUARTIER</b><span id="visites">LIEUX VISITES 0/6</span></div>
+  <div id="compteur" class="cache">-- i/s</div>
+  <div id="aide">ZQSD / FLECHES : SE DEPLACER<br>CLIC : ALLER ICI · E / ENTREE : ENTRER</div>
+  <div id="invite" class="cache"></div>
+  <div id="notification"></div>
 
   <script type="module" src="./src/main.js"></script>
 </body>

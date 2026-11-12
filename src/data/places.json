@@ -1,0 +1,44 @@
+[
+  {
+    "cle": "arene", "nom": "L'ARÈNE", "section": "Sport",
+    "x": -24, "z": 2.5, "rotation": 60,
+    "largeur": 7, "hauteur": 5.4, "profondeur": 6,
+    "style": "brique", "mur": "#8f4a3a", "toit": "#4a2e20", "accent": "#b8324f",
+    "etage": false, "signature": "arene"
+  },
+  {
+    "cle": "comptoir", "nom": "LE COMPTOIR", "section": "Expériences pro",
+    "x": -15.2, "z": -5.6, "rotation": 29,
+    "largeur": 7, "hauteur": 5.6, "profondeur": 6,
+    "style": "colombage", "mur": "#e3c389", "toit": "#96683f", "accent": "#d89c2a",
+    "signature": "comptoir"
+  },
+  {
+    "cle": "academie", "nom": "L'ACADÉMIE", "section": "Parcours scolaire",
+    "x": -5.6, "z": -8.7, "rotation": 9,
+    "largeur": 7.5, "hauteur": 6.8, "profondeur": 6,
+    "style": "pierre", "mur": "#b9ab9f", "toit": "#24366e", "accent": "#4c8cc8",
+    "signature": "academie"
+  },
+  {
+    "cle": "bourse", "nom": "LA BOURSE", "section": "Finance",
+    "x": 5.2, "z": -8.9, "rotation": -9,
+    "largeur": 9, "hauteur": 6.4, "profondeur": 6,
+    "style": "pierre", "mur": "#e3c389", "toit": "#24503a", "accent": "#3f7a42",
+    "fronton": true, "porteAvance": 2.4, "signature": "bourse"
+  },
+  {
+    "cle": "studio", "nom": "LE STUDIO", "section": "Musique",
+    "x": 16, "z": -5.4, "rotation": -29,
+    "largeur": 7, "hauteur": 5.6, "profondeur": 6,
+    "style": "colombage", "mur": "#c0935a", "toit": "#7e1e3c", "accent": "#e0507a",
+    "signature": "studio"
+  },
+  {
+    "cle": "atelier", "nom": "L'ATELIER", "section": "Couture et mode",
+    "x": 24, "z": 2.8, "rotation": -60,
+    "largeur": 7, "hauteur": 5.6, "profondeur": 6,
+    "style": "colombage", "mur": "#fbe6cc", "toit": "#432664", "accent": "#9a62c4",
+    "signature": "atelier"
+  }
+]
