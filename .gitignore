@@ -15,5 +15,7 @@ assets/_raw/
 .DS_Store
 Thumbs.db
 
-# Réglages locaux de l'application Claude
+# Réglages locaux de l'application Claude et notes de travail privées
 .claude/
+CLAUDE.md
+docs/
