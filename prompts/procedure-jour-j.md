@@ -54,6 +54,7 @@ Règles pendant la génération :
 | Planche-contact régulière (`python outils/assets.py planche`) | Juger l'ensemble, pas chaque image seule |
 | Journal tenu automatiquement dans `prompts/journal.md` | Savoir quel prompt et quel modèle ont donné quoi |
 | Si l'essai approche de la fin, on finit les P1 et on laisse les P2 | Les P2 ont tous une version provisoire correcte |
+| **Qualité maximale, sans compromis** (décision de Mathys) : meilleure résolution disponible, meilleur modèle par type (comparé sur l'ancrage), régénération tant que façades et objets ne sont pas irréprochables | Mathys veut un rendu impressionnant qui exploite tout ce que permet le connecteur |
 
 ## 5. Après la génération
 

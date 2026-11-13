@@ -1,6 +1,21 @@
 {
   "_lisezmoi": "Catalogue unique des assets générés. Lu par le jeu (src/engine/assets.js) et par outils/assets.py. Pour ajouter un asset : ajouter une entrée ici, puis relancer  python outils/assets.py liste",
   "densite": 32,
+  "_statuts": "Décision de Mathys (13 nov.) : le perso sera redessiné par lui. Façades et objets de décor : qualité maximale exigée, il jugera ensuite s'il les garde. Le reste est définitif. Clé = début de l'identifiant",
+  "statuts": {
+    "perso/marche": "provisoire (redessiné par Mathys)",
+    "facade/": "à juger par Mathys",
+    "decor/": "à juger par Mathys",
+    "style/": "référence"
+  },
+  "statut_par_defaut": "définitif",
+  "_variantes": "Nombre de variantes demandées, par début d'identifiant (sinon selon le type). Plus élevé là où la qualité doit être irréprochable",
+  "variantes": {
+    "style/": 8,
+    "facade/": 8,
+    "decor/": 6,
+    "titre/": 4
+  },
   "style": {
     "_lisezmoi": "Préfixe commun ajouté au début de chaque prompt, puis clause de vue selon le type, puis le sujet, puis les interdits. Expliqué dans prompts/bible-style.md",
     "prefixe": "16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures",

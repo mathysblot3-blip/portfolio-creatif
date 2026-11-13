@@ -17,7 +17,7 @@ Règles et explications : `prompts/bible-style.md`. Procédure du jour J : `prom
 | Vue « video » | HD-2D look: pixel art sprites and textures in a softly lit 3D diorama, tilt-shift depth of field, soft bloom, slow and smooth motion |
 | Interdits | Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures |
 
-Estimation : **179 générations** pour 44 assets.
+Estimation : **232 générations** pour 44 assets.
 
 ## Ordre de génération
 
@@ -32,7 +32,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `style/ancrage`
 
 - Rôle : Image d'ancrage : fixe le style de toutes les autres générations
-- Proportion : **16:9**, variantes : 4, taille finale : 1920×1080 px
+- Statut : **référence**
+- Proportion : **16:9**, variantes : 8, taille finale : 1920×1080 px
 - Référence de style : aucune (c’est elle qui sert de référence)
 
 ```
@@ -44,6 +45,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `sol/paves`
 
 - Rôle : Pavés de la place (2 × 2 unités par tuile)
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -54,6 +56,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `sol/herbe`
 
 - Rôle : Herbe autour de la place
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -64,7 +67,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/ecole`
 
 - Rôle : Mur de façade de l'École (7,5 × 6,8 unités). Le clocher, le toit, l'écu et le drapeau restent en 3D
-- Proportion : **1:1**, variantes : 4, taille finale : 240×218 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 8, taille finale : 240×218 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -74,7 +78,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/entreprise`
 
 - Rôle : Mur de façade de l'Entreprise (7 × 5,6 unités). Auvent, comptoir et caisses restent en 3D
-- Proportion : **4:3**, variantes : 4, taille finale : 224×179 px
+- Statut : **à juger par Mathys**
+- Proportion : **4:3**, variantes : 8, taille finale : 224×179 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -84,7 +89,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/banque`
 
 - Rôle : Mur de façade de la Banque, derrière les colonnes (9 × 6,4 unités). Colonnes, fronton et pièce d'or restent en 3D
-- Proportion : **3:2**, variantes : 4, taille finale : 288×205 px
+- Statut : **à juger par Mathys**
+- Proportion : **3:2**, variantes : 8, taille finale : 288×205 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -94,7 +100,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/concert`
 
 - Rôle : Mur de façade de la Salle de concert (7 × 5,6 unités). Note en néon et enceintes restent en 3D
-- Proportion : **4:3**, variantes : 4, taille finale : 224×179 px
+- Statut : **à juger par Mathys**
+- Proportion : **4:3**, variantes : 8, taille finale : 224×179 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -104,7 +111,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/atelier`
 
 - Rôle : Mur de façade de l'Atelier de couture (7 × 5,6 unités). Bobine géante et rouleaux de tissu restent en 3D
-- Proportion : **4:3**, variantes : 4, taille finale : 224×179 px
+- Statut : **à juger par Mathys**
+- Proportion : **4:3**, variantes : 8, taille finale : 224×179 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -114,7 +122,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `facade/colisee`
 
 - Rôle : Une travée du mur circulaire du Colisée, répétée 7 fois autour de l'arène (3,6 × 5,2 unités)
-- Proportion : **2:3**, variantes : 4, taille finale : 112×168 px
+- Statut : **à juger par Mathys**
+- Proportion : **2:3**, variantes : 8, taille finale : 112×168 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -124,6 +133,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `mur/colombage`
 
 - Rôle : Côtés des bâtiments à colombages (teinte donnée par places.json)
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -134,6 +144,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `mur/pierre`
 
 - Rôle : Côtés des bâtiments en pierre de taille (teinte donnée par places.json)
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -144,6 +155,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `toit/tuiles`
 
 - Rôle : Toits (teinte donnée par places.json)
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -154,6 +166,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `materiau/pierre`
 
 - Rôle : Pierre grise : soubassements, fontaine, muret, linteaux
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 32×32 px
 - Référence de style : image d’ancrage retenue
 
@@ -164,6 +177,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `materiau/bois`
 
 - Rôle : Bois : caisses, tonneaux, comptoir
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 32×32 px
 - Référence de style : image d’ancrage retenue
 
@@ -174,6 +188,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `vegetation/cypres`
 
 - Rôle : Cyprès (2 × 6 unités), posé comme un lutin. Le code l'agrandit selon les arbres
+- Statut : **définitif**
 - Proportion : **9:16**, variantes : 4, taille finale : 64×192 px
 - Référence de style : image d’ancrage retenue
 
@@ -184,6 +199,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `vegetation/feuillu`
 
 - Rôle : Arbre d'automne (4 × 5 unités)
+- Statut : **définitif**
 - Proportion : **3:4**, variantes : 4, taille finale : 128×160 px
 - Référence de style : image d’ancrage retenue
 
@@ -194,6 +210,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `vegetation/buisson`
 
 - Rôle : Buisson bas du premier plan (2,5 × 1,6 unités)
+- Statut : **définitif**
 - Proportion : **3:2**, variantes : 4, taille finale : 80×52 px
 - Référence de style : image d’ancrage retenue
 
@@ -204,6 +221,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `perso/marche`
 
 - Rôle : Perso jouable : 4 images de marche × 3 directions (ligne 1 face, ligne 2 dos, ligne 3 profil droit). Le profil gauche est le miroir
+- Statut : **provisoire (redessiné par Mathys)**
 - Proportion : **1:1**, variantes : 6, taille finale : 128×144 px
 - Référence de style : image d’ancrage retenue
 
@@ -214,6 +232,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/ecole`
 
 - Rôle : Fond du tableau de l'École : ardoise verte (le contenu est ajouté par le code)
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -224,6 +243,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/entreprise`
 
 - Rôle : Fond du tableau de l'Entreprise : liège
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -234,6 +254,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/banque`
 
 - Rôle : Fond du tableau de la Banque : feutrine verte
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -244,6 +265,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/concert`
 
 - Rôle : Fond du tableau de la Salle de concert : panneau noir couvert de vieilles affiches
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -254,6 +276,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/atelier`
 
 - Rôle : Fond du tableau de l'Atelier : toile de lin
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -264,6 +287,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `tableau/colisee`
 
 - Rôle : Fond du tableau du Colisée : planches de bois brut
+- Statut : **définitif**
 - Proportion : **16:9**, variantes : 4, taille finale : 232×128 px
 - Référence de style : image d’ancrage retenue
 
@@ -276,6 +300,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `perso/chat`
 
 - Rôle : Chat qui suit le perso : 4 images de marche × 3 directions (face, dos, profil droit)
+- Statut : **définitif**
 - Proportion : **4:3**, variantes : 6, taille finale : 96×72 px
 - Référence de style : image d’ancrage retenue
 
@@ -286,6 +311,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/ecole`
 
 - Rôle : Mur intérieur de l'École, autour du tableau
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -296,6 +322,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/entreprise`
 
 - Rôle : Mur intérieur de l'Entreprise
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -306,6 +333,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/banque`
 
 - Rôle : Mur intérieur de la Banque
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -316,6 +344,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/concert`
 
 - Rôle : Mur intérieur de la Salle de concert
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -326,6 +355,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/atelier`
 
 - Rôle : Mur intérieur de l'Atelier
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -336,6 +366,7 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `interieur/colisee`
 
 - Rôle : Mur intérieur du Colisée
+- Statut : **définitif**
 - Proportion : **1:1**, variantes : 4, taille finale : 64×64 px
 - Référence de style : image d’ancrage retenue
 
@@ -346,7 +377,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/ecole-tableau-noir`
 
 - Rôle : Élément de décor épinglé : petit tableau noir
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -356,7 +388,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/ecole-globe`
 
 - Rôle : Élément de décor : globe terrestre
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -366,7 +399,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/entreprise-plante`
 
 - Rôle : Élément de décor : plante verte
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -376,7 +410,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/entreprise-classeurs`
 
 - Rôle : Élément de décor : armoire à classeurs
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -386,7 +421,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/banque-coffre`
 
 - Rôle : Élément de décor : coffre-fort
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -396,7 +432,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/banque-pieces`
 
 - Rôle : Élément de décor : pile de pièces d'or
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -406,7 +443,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/concert-guitare`
 
 - Rôle : Élément de décor : guitare
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -416,7 +454,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/concert-enceinte`
 
 - Rôle : Élément de décor : enceinte
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -426,7 +465,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/atelier-mannequin`
 
 - Rôle : Élément de décor : mannequin de couture
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -436,7 +476,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/atelier-machine`
 
 - Rôle : Élément de décor : machine à coudre
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -446,7 +487,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/colisee-ratelier`
 
 - Rôle : Élément de décor : râtelier d'armes de gladiateur
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -456,7 +498,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `decor/colisee-gants`
 
 - Rôle : Élément de décor : gants de boxe
-- Proportion : **1:1**, variantes : 4, taille finale : 128×128 px
+- Statut : **à juger par Mathys**
+- Proportion : **1:1**, variantes : 6, taille finale : 128×128 px
 - Référence de style : image d’ancrage retenue
 
 ```
@@ -466,7 +509,8 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 ### `titre/fond`
 
 - Rôle : Fond animé de l'écran titre, en boucle. Le titre et le bouton sont dessinés par le code par-dessus
-- Proportion : **16:9**, variantes : 3, taille finale : 1280×720 px
+- Statut : **définitif**
+- Proportion : **16:9**, variantes : 4, taille finale : 1280×720 px
 - Référence de style : image d’ancrage retenue
 
 ```

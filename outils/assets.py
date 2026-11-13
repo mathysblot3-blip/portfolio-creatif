@@ -85,6 +85,20 @@ def chemin_final(asset: dict) -> Path:
     return DOSSIER_IA / f"{asset['id']}{extension}"
 
 
+def par_prefixe(table: dict, identifiant: str, defaut):
+    """Valeur de la table dont la clé est le début le plus long de l'identifiant."""
+    cles = [c for c in table if identifiant.startswith(c)]
+    return table[max(cles, key=len)] if cles else defaut
+
+
+def statut(catalogue: dict, asset: dict) -> str:
+    return par_prefixe(catalogue.get("statuts", {}), asset["id"], catalogue.get("statut_par_defaut", "définitif"))
+
+
+def variantes(catalogue: dict, asset: dict) -> int:
+    return par_prefixe(catalogue.get("variantes", {}), asset["id"], VARIANTES[asset["type"]])
+
+
 def prompt_complet(catalogue: dict, asset: dict) -> str:
     style = catalogue["style"]
     morceaux = [style["prefixe"], style["vues"][asset["type"]], asset["sujet"], style["interdits"]]
@@ -101,7 +115,7 @@ FOND = {"reference": "opaque", "tuile": "opaque, sans raccord", "tuile-teinte": 
 def commande_liste() -> None:
     catalogue = lire_catalogue()
     assets = catalogue["assets"]
-    total = sum(VARIANTES[a["type"]] for a in assets)
+    total = sum(variantes(catalogue, a) for a in assets)
 
     # ----- ASSETS_A_FAIRE.md -----
     lignes = [
@@ -113,8 +127,8 @@ def commande_liste() -> None:
         "",
         "Chaque ligne a un emplacement prêt dans le jeu : tant que le fichier final manque, le site affiche la version provisoire dessinée par le code.",
         "",
-        "| Priorité | Identifiant | Type | Fichier final | Taille (px) | Proportion à demander | Fond | Rôle | État |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Priorité | Identifiant | Statut | Type | Fichier final | Taille (px) | Proportion à demander | Variantes | Fond | Rôle | État |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for a in sorted(assets, key=lambda a: (a["priorite"], a["id"])):
         final = chemin_final(a).relative_to(RACINE).as_posix()
@@ -124,12 +138,11 @@ def commande_liste() -> None:
         etat = "présent" if chemin_final(a).exists() else "manquant"
         if a["type"] == "reference":
             final, etat = "assets/_raw/style/ancrage/", "non utilisé par le jeu"
-        lignes.append(f"| {a['priorite']} | `{a['id']}` | {a['type']} | `{final}` | {taille} | {a['ratio']} | {FOND[a['type']]} | {a['role']} | {etat} |")
+        lignes.append(f"| {a['priorite']} | `{a['id']}` | {statut(catalogue, a)} | {a['type']} | `{final}` | {taille} | {a['ratio']} | {variantes(catalogue, a)} | {FOND[a['type']]} | {a['role']} | {etat} |")
 
     lignes += [
         "",
-        f"Total : {len(assets)} assets, environ **{total} générations** en comptant les variantes "
-        f"({', '.join(f'{t} : {n}' for t, n in VARIANTES.items())} par asset).",
+        f"Total : {len(assets)} assets, environ **{total} générations** en comptant les variantes.",
         "",
         "## 2. Ce que fournit Mathys (jamais généré)",
         "",
@@ -189,7 +202,8 @@ def commande_liste() -> None:
                 f"### `{a['id']}`",
                 "",
                 f"- Rôle : {a['role']}",
-                f"- Proportion : **{a['ratio']}**, variantes : {VARIANTES[a['type']]}, taille finale : {'×'.join(map(str, a['taille']))} px",
+                f"- Statut : **{statut(catalogue, a)}**",
+                f"- Proportion : **{a['ratio']}**, variantes : {variantes(catalogue, a)}, taille finale : {'×'.join(map(str, a['taille']))} px",
                 f"- Référence de style : {'aucune (c’est elle qui sert de référence)' if a['type'] == 'reference' else 'image d’ancrage retenue'}",
                 "",
                 "```",
