@@ -87,5 +87,8 @@ export function creerJoueur(scene, collisionsDepart, navigationDepart) {
   // Tourne le perso sans le déplacer (par exemple face au mur quand il regarde un élément).
   function regarder(nouvelle) { orientation = nouvelle; miroir = false; }
 
-  return { lutin, position: lutin.position, allerVers, arreter, placer, regarder, mettreAJour };
+  // Image du perso vu de dos, réutilisée dans les intérieurs
+  const imageDos = () => images.dos[0];
+
+  return { lutin, position: lutin.position, allerVers, arreter, placer, regarder, mettreAJour, imageDos };
 }

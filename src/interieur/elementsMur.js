@@ -1,19 +1,17 @@
 // =====================================================================
-// ÉLÉMENTS DU MUR
-// Fabrique l'objet 3D de chaque élément du contenu (photo encadrée, diplôme, affiche, note,
-// écran vidéo, objet de décor) et calcule leur disposition sur le mur.
+// ÉLÉMENTS DU TABLEAU
+// Fabrique l'objet 3D de chaque élément du contenu (photo, diplôme, affiche, note, écran vidéo,
+// élément de décor) et calcule leur disposition "en vrac" sur le tableau.
 // Si le fichier n'existe pas encore, une carte "à fournir" s'affiche à sa place :
-// dès que tu déposes le fichier au bon endroit, la vraie image la remplace, sans toucher au code.
+// dès que le fichier est déposé au bon endroit, la vraie image la remplace, sans toucher au code.
 // =====================================================================
 import * as THREE from 'three';
+import { alea } from '../engine/textures.js';
 
 // Taille de base de chaque forme, en unités (largeur, hauteur), avant le réglage "taille".
 const TAILLES = {
-  cadre: [1.5, 1.15], diplome: [1.6, 1.15], affiche: [1.25, 1.7], note: [1.2, 1.2], ecran: [1.9, 1.25],
+  cadre: [1.5, 1.15], diplome: [1.6, 1.15], affiche: [1.25, 1.7], note: [1.2, 1.2], ecran: [1.9, 1.25], objet: [0.95, 0.95],
 };
-const HAUTEUR_PLAQUE = 0.26; // petite plaque portant le titre, sous chaque élément
-const ESPACE = 0.45;         // espace entre deux éléments
-
 const NOMS = { cadre: 'PHOTO', diplome: 'DIPLOME', affiche: 'AFFICHE', note: 'NOTE', ecran: 'VIDEO', objet: 'DECOR' };
 const sansAccent = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '');
 const chargeur = new THREE.TextureLoader();
@@ -43,7 +41,7 @@ function couperLignes(g, texte, largeurMax, nombreMax) {
   return lignes;
 }
 
-// Carte "à fournir" : hachures, type d'élément et nom du fichier attendu.
+// Carte "à fournir" : hachures, type d'élément, titre et nom du fichier attendu.
 function carteAFournir(element, accent) {
   return toile(256, 192, (g, l, h) => {
     g.fillStyle = '#f4ecd8'; g.fillRect(0, 0, l, h);
@@ -53,11 +51,12 @@ function carteAFournir(element, accent) {
     g.fillStyle = accent; g.fillRect(8, 8, l - 16, 30);
     g.fillStyle = '#f4ecd8'; g.font = '12px "Press Start 2P", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(element.video ? 'VIDEO' : NOMS[element.forme], l / 2, 24);
-    if (element.forme === 'ecran') { g.fillStyle = '#14101a'; g.beginPath(); g.moveTo(112, 70); g.lineTo(150, 92); g.lineTo(112, 114); g.fill(); }
-    g.fillStyle = '#14101a'; g.font = '9px "Press Start 2P", monospace';
-    g.fillText('A FOURNIR', l / 2, element.forme === 'ecran' ? 140 : 96);
-    g.font = '600 15px "Space Grotesk", sans-serif';
-    g.fillText(element.nomFichier || 'aucun fichier', l / 2, element.forme === 'ecran' ? 164 : 126);
+    g.fillStyle = '#14101a';
+    if (element.forme === 'ecran') { g.beginPath(); g.moveTo(116, 52); g.lineTo(146, 68); g.lineTo(116, 84); g.fill(); }
+    g.font = '600 19px "Space Grotesk", sans-serif';
+    couperLignes(g, element.titre, l - 40, 2).forEach((t, i) => g.fillText(t, l / 2, 108 + i * 22 - (element.forme === 'ecran' ? 0 : 12)));
+    g.font = '9px "Press Start 2P", monospace'; g.fillStyle = '#7d7080';
+    g.fillText(`A FOURNIR : ${sansAccent(element.nomFichier || 'aucun fichier')}`.slice(0, 30), l / 2, 166);
   });
 }
 
@@ -66,48 +65,39 @@ function carteNote(element, accent) {
   return toile(256, 256, (g, l, h) => {
     g.fillStyle = '#fbe6cc'; g.fillRect(0, 0, l, h);
     g.fillStyle = 'rgba(20,16,26,0.08)'; g.fillRect(0, h - 10, l, 10);
-    g.fillStyle = accent; g.fillRect(l / 2 - 9, 6, 18, 18); // punaise
+    g.fillStyle = accent; g.fillRect(0, 0, l, 8);
     g.fillStyle = '#14101a'; g.font = '10px "Press Start 2P", monospace'; g.textAlign = 'left'; g.textBaseline = 'top';
-    couperLignes(g, sansAccent(element.titre.toUpperCase()), l - 36, 3).forEach((t, i) => g.fillText(t, 18, 36 + i * 16));
+    couperLignes(g, sansAccent(element.titre.toUpperCase()), l - 36, 3).forEach((t, i) => g.fillText(t, 18, 30 + i * 16));
     g.font = '600 16px "Space Grotesk", sans-serif'; g.fillStyle = '#2b2433';
-    couperLignes(g, element.texte.replace(/\n/g, ' '), l - 36, 7).forEach((t, i) => g.fillText(t, 18, 100 + i * 20));
+    couperLignes(g, element.texte.replace(/\n/g, ' '), l - 36, 8).forEach((t, i) => g.fillText(t, 18, 92 + i * 20));
   });
-}
-
-// Plaque portant le titre, sous l'élément.
-function plaque(titre, largeur) {
-  const texture = toile(512, 52, (g, l, h) => {
-    g.fillStyle = '#14101a'; g.fillRect(0, 0, l, h);
-    g.fillStyle = '#c0935a'; g.fillRect(0, 0, l, 3); g.fillRect(0, h - 3, l, 3);
-    g.fillStyle = '#f4ecd8'; g.font = '14px "Press Start 2P", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(couperLignes(g, sansAccent(titre.toUpperCase()), l - 24, 1)[0], l / 2, h / 2 + 1);
-  });
-  return new THREE.Mesh(new THREE.PlaneGeometry(largeur, HAUTEUR_PLAQUE), new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8 }));
 }
 
 const mat = (options) => new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0, ...options });
 
-// Fabrique l'objet 3D d'un élément de preuve. Renvoie le groupe et la surface cliquable.
-export function creerElementMural(element, accent) {
+// Fabrique l'objet 3D d'un élément. Renvoie le groupe, ses surfaces cliquables et sa taille.
+export function creerElement(element, accent) {
   const [l0, h0] = TAILLES[element.forme] ?? TAILLES.cadre;
   const largeur = l0 * element.taille, hauteur = h0 * element.taille;
   const groupe = new THREE.Group();
+  const deco = element.role === 'deco';
 
-  // Cadre (fond) selon la forme
-  const bord = { cadre: 0.09, diplome: 0.11, ecran: 0.12, affiche: 0, note: 0 }[element.forme];
-  const couleurCadre = { cadre: '#4a2e20', diplome: '#d89c2a', ecran: '#14101a' }[element.forme];
+  // Cadre (fond) selon la forme. Les éléments de décor n'en ont pas : ce sont des découpes.
+  const bord = deco ? 0 : { cadre: 0.08, diplome: 0.1, ecran: 0.11, affiche: 0, note: 0 }[element.forme] ?? 0;
+  const couleurCadre = { cadre: '#f4ecd8', diplome: '#d89c2a', ecran: '#14101a' }[element.forme];
   let cadre = null;
   if (bord) {
-    cadre = new THREE.Mesh(new THREE.BoxGeometry(largeur, hauteur, 0.08), mat({ color: couleurCadre, roughness: element.forme === 'diplome' ? 0.4 : 0.9, metalness: element.forme === 'diplome' ? 0.3 : 0 }));
-    cadre.position.z = 0.04;
+    cadre = new THREE.Mesh(new THREE.BoxGeometry(largeur, hauteur, 0.05), mat({ color: couleurCadre, roughness: element.forme === 'diplome' ? 0.4 : 0.9, metalness: element.forme === 'diplome' ? 0.3 : 0 }));
+    cadre.position.z = 0.025;
     cadre.castShadow = true;
     groupe.add(cadre);
   }
 
   // Surface qui porte l'image
   const lInt = largeur - bord * 2, hInt = hauteur - bord * 2;
-  const image = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat({ map: null }));
-  image.position.z = bord ? 0.085 : 0.02;
+  const image = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat({ map: null, alphaTest: deco ? 0.5 : 0, side: THREE.DoubleSide }));
+  image.position.z = bord ? 0.052 : 0.02;
+  image.castShadow = true;
   groupe.add(image);
 
   // Ajuste l'image à la place disponible en gardant ses proportions (et le cadre autour d'elle).
@@ -115,98 +105,73 @@ export function creerElementMural(element, accent) {
     const echelle = Math.min(lInt / largeurImage, hInt / hauteurImage);
     image.scale.set(largeurImage * echelle, hauteurImage * echelle, 1);
     if (cadre) cadre.scale.set((largeurImage * echelle + bord * 2) / largeur, (hauteurImage * echelle + bord * 2) / hauteur, 1);
+    groupe.userData.hautRelatif = (hauteurImage * echelle) / 2 + bord; // où placer la fixation
   };
 
   const montrer = (texture, l, h) => { image.material.map = texture; image.material.needsUpdate = true; ajuster(l, h); };
   if (element.forme === 'note') {
     montrer(carteNote(element, accent), 1, 1);
   } else {
-    montrer(carteAFournir(element, accent), 4, 3);
-    // Pour une vidéo, on montre sa vignette sur le mur (la vidéo elle-même se lit dans la visionneuse).
+    montrer(carteAFournir(element, deco ? '#7d7080' : accent), 4, 3);
+    // Pour une vidéo, on montre sa vignette au tableau (la vidéo elle-même se lit dans la visionneuse).
     const source = element.video ? element.vignette : element.fichier;
     if (source) {
       chargeur.load(source, (texture) => {
         texture.colorSpace = THREE.SRGBColorSpace;
+        if (deco) texture.magFilter = THREE.NearestFilter; // le décor est du pixel art
         montrer(texture, texture.image.width, texture.image.height);
+        if (groupe.userData.surRedimension) groupe.userData.surRedimension();
       }, undefined, () => { /* fichier absent : la carte "à fournir" reste affichée */ });
     }
   }
 
-  // Punaises pour les affiches
-  if (element.forme === 'affiche') {
-    [-1, 1].forEach((cote) => {
-      const punaise = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 4), mat({ color: accent }));
-      punaise.position.set(cote * (lInt / 2 - 0.12), hInt / 2 - 0.12, 0.05);
-      groupe.add(punaise);
-    });
-  }
-
-  // Plaque de titre
-  const etiquette = plaque(element.titre, Math.min(largeur, 1.8));
-  etiquette.position.set(0, -hauteur / 2 - 0.08 - HAUTEUR_PLAQUE / 2, 0.02);
-  groupe.add(etiquette);
-
-  image.userData.element = element;
-  if (cadre) cadre.userData.element = element;
-  return { groupe, cliquables: cadre ? [image, cadre] : [image], largeur, hauteur: hauteur + 0.08 + HAUTEUR_PLAQUE };
-}
-
-// Objet de décor : un panneau vertical posé au sol, avec sa propre ombre.
-export function creerObjetDecor(element) {
-  const hauteur = 1.7 * element.taille, largeur = 1.3 * element.taille;
-  const forme = new THREE.PlaneGeometry(1, 1);
-  forme.translate(0, 0.5, 0);
-  const materiau = mat({ map: carteAFournir(element, '#7d7080'), side: THREE.DoubleSide, alphaTest: 0.5 });
-  const objet = new THREE.Mesh(forme, materiau);
-  objet.scale.set(largeur, largeur * 0.75, 1);
-  objet.castShadow = true;
-  if (element.fichier) {
-    chargeur.load(element.fichier, (texture) => {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.magFilter = THREE.NearestFilter; // les objets de décor sont du pixel art
-      materiau.map = texture; materiau.needsUpdate = true;
-      const proportion = texture.image.width / texture.image.height;
-      objet.scale.set(hauteur * proportion, hauteur, 1);
-      objet.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: texture, alphaTest: 0.5 });
-    }, undefined, () => {});
-  }
-  return objet;
+  if (!deco) { image.userData.element = element; if (cadre) cadre.userData.element = element; }
+  return { groupe, cliquables: deco ? [] : (cadre ? [image, cadre] : [image]), largeur, hauteur };
 }
 
 // ---------------------------------------------------------------------
-// DISPOSITION AUTOMATIQUE
-// On essaie de répartir les éléments sur 1, 2, 3 ou 4 rangées, et on garde la répartition
-// qui permet de les afficher le plus grand possible dans la surface du mur.
-// Renvoie, pour chaque élément, sa position (x, y) au centre de l'objet et son échelle.
+// DISPOSITION "EN VRAC"
+// 1. On cherche le nombre de rangées (1 à 4) qui permet d'afficher les éléments le plus grand possible.
+// 2. On décale ensuite chaque élément au hasard (un peu de côté, un peu en hauteur, légèrement penché),
+//    comme des papiers punaisés à la main. Le hasard est "reproductible" : même lieu, même disposition.
+// Renvoie, pour chaque élément : x, y (centre), echelle, angle.
 // ---------------------------------------------------------------------
-export function disposer(blocs, largeurDispo, yBas, yHaut) {
+export function disposerEnVrac(blocs, largeurDispo, hauteurDispo, graine) {
   const n = blocs.length;
   if (!n) return [];
-  const hauteurDispo = yHaut - yBas;
+  const ESPACE = 0.3;
   let meilleur = null;
   for (let rangees = 1; rangees <= Math.min(4, n); rangees++) {
     const parRangee = Math.ceil(n / rangees), lignes = [];
-    for (let i = 0; i < n; i += parRangee) lignes.push(blocs.slice(i, i + parRangee));
+    for (let i = 0; i < n; i += parRangee) lignes.push(blocs.slice(i, i + parRangee).map((b, k) => ({ ...b, index: i + k })));
     const largeurMax = Math.max(...lignes.map((r) => r.reduce((s, b) => s + b.largeur, 0) + ESPACE * (r.length - 1)));
     const hauteurTotale = lignes.reduce((s, r) => s + Math.max(...r.map((b) => b.hauteur)), 0) + ESPACE * (lignes.length - 1);
-    const echelle = Math.min(1.7, largeurDispo / largeurMax, hauteurDispo / hauteurTotale);
+    const echelle = Math.min(1.5, (largeurDispo * 0.94) / largeurMax, (hauteurDispo * 0.92) / hauteurTotale);
     if (!meilleur || echelle > meilleur.echelle + 0.01) meilleur = { echelle, lignes, hauteurTotale };
   }
 
+  const r = alea(graine);
   const { echelle, lignes, hauteurTotale } = meilleur;
-  const positions = [];
-  let y = yBas + hauteurDispo / 2 + (hauteurTotale * echelle) / 2; // haut de la première rangée
-  for (const ligne of lignes) {
+  const positions = new Array(n);
+  let y = (hauteurTotale * echelle) / 2;
+  lignes.forEach((ligne, numero) => {
     const hRangee = Math.max(...ligne.map((b) => b.hauteur)) * echelle;
     const lRangee = (ligne.reduce((s, b) => s + b.largeur, 0) + ESPACE * (ligne.length - 1)) * echelle;
-    let x = -lRangee / 2;
+    const marge = Math.max(0, (largeurDispo - lRangee) / 2);
+    let x = -lRangee / 2 + (numero % 2 ? 1 : -1) * marge * 0.5 * r(); // rangées décalées
     for (const b of ligne) {
-      const l = b.largeur * echelle;
-      // y désigne le centre de l'élément lui-même, plaque de titre exclue
-      positions.push({ x: x + l / 2, y: y - hRangee / 2 + (HAUTEUR_PLAQUE + 0.08) * echelle / 2, echelle });
+      const l = b.largeur * echelle, h = b.hauteur * echelle;
+      const dx = (r() - 0.5) * ESPACE * echelle * 0.9;
+      const dy = (r() - 0.5) * Math.max(0, hRangee - h + ESPACE * echelle * 0.8);
+      positions[b.index] = {
+        x: THREE.MathUtils.clamp(x + l / 2 + dx, -largeurDispo / 2 + l / 2, largeurDispo / 2 - l / 2),
+        y: y - hRangee / 2 + dy,
+        echelle: echelle * (0.94 + r() * 0.1),
+        angle: (r() - 0.5) * 0.17,
+      };
       x += l + ESPACE * echelle;
     }
     y -= hRangee + ESPACE * echelle;
-  }
+  });
   return positions;
 }

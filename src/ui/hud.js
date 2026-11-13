@@ -7,8 +7,8 @@
 const element = (id) => document.getElementById(id);
 
 const AIDES = {
-  ville: 'ZQSD / FLECHES : SE DEPLACER<br>CLIC : ALLER ICI · E / ENTREE : ENTRER',
-  piece: 'ZQSD / FLECHES : SE DEPLACER · E : REGARDER<br>CLIC : REGARDER · ECHAP : SORTIR',
+  ville: 'CLIC : SE DEPLACER (OU ZQSD / FLECHES)<br>MARCHE JUSQU\'A UNE PORTE POUR ENTRER',
+  piece: 'CLIC SUR UN ELEMENT : L\'AGRANDIR<br>ECHAP : RETOUR A LA PLACE',
   visionneuse: '&lt; &gt; : ELEMENT PRECEDENT / SUIVANT<br>ECHAP : FERMER',
 };
 

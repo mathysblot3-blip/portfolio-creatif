@@ -5,6 +5,7 @@
 // une tuile de 64 × 64 px couvre exactement 2 × 2 unités.
 // =====================================================================
 import * as THREE from 'three';
+import { dessinerPicto } from './pictos.js';
 
 // Générateur de nombres "au hasard" reproductible : la même graine donne toujours la même texture.
 export function alea(graine) {
@@ -226,22 +227,24 @@ export const TEX = {
     g.fillStyle = '#f8dc78'; g.fillRect(0, 0, l, 2); g.fillRect(5, 14, 6, 6); g.fillRect(7, 20, 2, 8);
   }, { repetable: false }),
 
-  // Blason suspendu : repère coloré de chaque lieu
-  blason: (couleur) => texturePixel(16, 20, (g) => {
-    g.fillStyle = '#14101a'; g.fillRect(1, 0, 14, 14); g.fillRect(3, 14, 10, 3); g.fillRect(5, 17, 6, 2);
-    g.fillStyle = couleur; g.fillRect(2, 1, 12, 12); g.fillRect(4, 13, 8, 3); g.fillRect(6, 16, 4, 2);
-    g.fillStyle = '#f4ecd8'; g.fillRect(6, 4, 4, 6);
+  // Enseigne suspendue en forme d'écu, portant le pictogramme du lieu (aucun texte)
+  blason: (couleur, picto) => texturePixel(32, 40, (g) => {
+    g.fillStyle = '#14101a'; g.fillRect(0, 0, 32, 28); g.fillRect(3, 28, 26, 5); g.fillRect(7, 33, 18, 4); g.fillRect(12, 37, 8, 3);
+    g.fillStyle = couleur; g.fillRect(1, 1, 30, 26); g.fillRect(4, 27, 24, 5); g.fillRect(8, 32, 16, 4); g.fillRect(13, 36, 6, 2);
+    g.fillStyle = '#f4ecd8'; g.fillRect(3, 3, 26, 26);
+    dessinerPicto(g, picto, 4, 4);
   }, { repetable: false }),
 
-  // Enseigne avec le nom du lieu. Sa largeur s'adapte à la longueur du texte (8 px par lettre).
-  // La police pixel est chargée au démarrage : le texte est redessiné à ce moment-là (voir ville.js).
-  enseigne: (texte, couleur) => texturePixel(Math.max(128, Math.ceil((texte.length * 8 + 24) / 8) * 8), 24, (g, l, h) => {
-    g.fillStyle = '#2a1a14'; g.fillRect(0, 0, l, h);
-    g.fillStyle = couleur; g.fillRect(2, 2, l - 4, h - 4);
-    g.fillStyle = '#14101a'; g.fillRect(4, 4, l - 8, h - 8);
-    g.fillStyle = '#f4ecd8'; g.font = '8px "Press Start 2P", monospace';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(texte, l / 2, h / 2 + 1);
+  // Pictogramme lumineux (néon de la salle de concert) : le dessin seul, sur fond transparent
+  pictoSeul: (picto) => texturePixel(24, 24, (g) => dessinerPicto(g, picto, 0, 0), { repetable: false }),
+
+  // Affiche de concert collée sur une façade : aplats de couleur, aucun texte lisible
+  affiche: (fond, motif, graine) => texturePixel(24, 32, (g, l, h) => {
+    const r = alea(graine);
+    g.fillStyle = fond; g.fillRect(0, 0, l, h);
+    g.fillStyle = motif; g.beginPath(); g.arc(12, 12, 7 + r() * 3, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#f4ecd8'; g.fillRect(3, 23, 18, 2); g.fillRect(5, 27, 14, 1);
+    g.fillStyle = nuance(fond, 0.6); g.fillRect(0, 0, l, 1); g.fillRect(l - 1, 0, 1, h);
   }, { repetable: false }),
 
   // ----- Matières des intérieurs -----

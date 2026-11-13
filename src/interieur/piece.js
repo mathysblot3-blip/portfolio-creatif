@@ -1,151 +1,165 @@
 // =====================================================================
-// VUE INTÉRIEURE D'UN LIEU
-// Une pièce vue de face : sol, murs, et au fond le mur qui porte le contenu du lieu
-// (lu dans contenu/<lieu>.md). Le perso s'y promène et regarde les éléments un par un.
-// Chaque lieu a son ambiance : école, entreprise, banque, salle de concert, atelier, colisée.
+// VUE INTÉRIEURE D'UN LIEU (plan fixe)
+// On ne se déplace pas : on voit, en bas au centre, le perso de dos et flou, et devant lui
+// un tableau d'affichage propre au lieu, où le contenu (contenu/<lieu>.md) est épinglé en vrac.
+// Tout se fait à la souris : survoler un élément le soulève, cliquer l'ouvre en grand.
+//
+// L'animation d'entrée (caméra qui avance, éléments épinglés un par un, fils tendus à la fin)
+// est faite en code. Elle pourra être enrichie plus tard, mais le contenu restera toujours
+// une couche séparée, modifiable sans outil de génération.
 // =====================================================================
 import * as THREE from 'three';
-import { TEX, nuance } from '../engine/textures.js';
-import { planDense, boiteDense } from '../world/formes.js';
-import { creerCollisions } from '../world/collisions.js';
-import { creerNavigation } from '../world/chemin.js';
+import { planDense } from '../world/formes.js';
 import { lireContenu } from '../contenu/lecteur.js';
-import { creerElementMural, creerObjetDecor, disposer } from './elementsMur.js';
+import { creerElement, disposerEnVrac } from './elementsMur.js';
+import { creerTableau, creerFixation, creerFil, LARGEUR_TABLEAU, HAUTEUR_TABLEAU } from './tableaux.js';
+import { creerLutin } from '../actors/lutin.js';
 
-export const LARGEUR = 16, PROFONDEUR = 9, HAUTEUR = 6.2;
-const Z_MUR = -PROFONDEUR / 2;
+const Y_TABLEAU = 2.55;          // hauteur du centre du tableau
+const Z_PERSO = 3.3;             // le perso se tient entre la caméra et le tableau
 
-// Cadrage de la caméra dans les pièces : fixe, face au mur, elle suit seulement un peu le perso de côté.
-export const CAMERA_INTERIEUR = { fov: 26, y: 7, z: 19, visee: 14, suiviX: 0.25 };
+// Cadrage de la caméra : fixe, légèrement en contre-plongée vers le tableau.
+// "visee" négative = la caméra regarde un peu vers le haut.
+export const CAMERA_INTERIEUR = { fov: 30, y: 1.75, z: 9.0, visee: -5, suiviX: 0 };
+const RECUL_ENTREE = 3.0;        // la caméra démarre plus loin et avance pendant l'animation d'entrée
 
-// Ambiance de chaque pièce : matières du mur, du soubassement et du sol, couleur des lumières.
-const STYLES = {
-  ecole:      { mur: () => TEX.enduit('#e3c389'), bas: () => TEX.parquet('#6b4630'), sol: () => TEX.parquet('#96683f'), lampe: '#ffd7a0' },
-  entreprise: { mur: () => TEX.enduit('#dcd6c8'), bas: () => TEX.enduit('#4a3f52'), sol: () => TEX.damier('#b9ab9f', '#7d7080'), lampe: '#fff1d8' },
-  banque:     { mur: () => TEX.pierreTaillee('#e3c389', 51), bas: () => TEX.pierreTaillee('#24503a', 52), sol: () => TEX.damier('#f4ecd8', '#24503a'), lampe: '#ffe2a8' },
-  concert:    { mur: () => TEX.brique('#4a3f52', 53), bas: () => TEX.enduit('#14101a'), sol: () => TEX.parquet('#4a2e20'), lampe: '#f08a9c' },
-  atelier:    { mur: () => TEX.rayures('#fbe6cc', '#f08a9c'), bas: () => TEX.parquet('#6b4630'), sol: () => TEX.parquet('#c0935a'), lampe: '#ffd7a0' },
-  colisee:    { mur: () => TEX.arcades('#c0935a'), bas: () => TEX.pierreTaillee('#96683f', 54), sol: () => TEX.sable(), lampe: '#ff9a40' },
-};
+// Flou de profondeur des intérieurs : tableau net, perso au premier plan très flou.
+export const FLOU_INTERIEUR = { zoneAvant: 0.5, zoneArriere: 3, transition: 2, rayonMax: 0.018 };
 
-const mat = (options) => new THREE.MeshStandardMaterial({ roughness: 0.92, metalness: 0, ...options });
+const lisser = (t) => 1 - Math.pow(1 - THREE.MathUtils.clamp(t, 0, 1), 3);            // départ rapide, arrivée douce
+const rebond = (t) => { const c = 1.6; t = THREE.MathUtils.clamp(t, 0, 1) - 1; return 1 + (c + 1) * t * t * t + c * t * t; };
 
-export function construirePiece(lieu) {
-  const style = STYLES[lieu.cle] ?? STYLES.ecole;
+export function construirePiece(lieu, imageDos) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#14101a');
+  const graine = [...lieu.cle].reduce((s, c) => s + c.charCodeAt(0), 0);
 
-  const ajouter = (forme, materiau, x, y, z, ombre = true) => {
-    const objet = new THREE.Mesh(forme, materiau);
-    objet.position.set(x, y, z);
-    objet.castShadow = ombre;
-    objet.receiveShadow = true;
-    scene.add(objet);
-    return objet;
-  };
-
-  // ---------- Murs et sol ----------
-  const sol = ajouter(planDense(LARGEUR, PROFONDEUR + 2), mat({ map: style.sol() }), 0, 0, 1, false);
-  sol.rotation.x = -Math.PI / 2;
-  const murTex = mat({ map: style.mur() });
-  ajouter(planDense(LARGEUR, HAUTEUR), murTex, 0, HAUTEUR / 2, Z_MUR, false);                    // mur du fond
-  [-1, 1].forEach((cote) => {                                                                    // murs de côté
-    const mur = ajouter(planDense(PROFONDEUR + 2, HAUTEUR), murTex, cote * LARGEUR / 2, HAUTEUR / 2, 1, false);
-    mur.rotation.y = -cote * Math.PI / 2;
-  });
-  ajouter(boiteDense(LARGEUR, 1.0, 0.12), mat({ map: style.bas() }), 0, 0.5, Z_MUR + 0.06);      // soubassement
-  ajouter(new THREE.BoxGeometry(LARGEUR, 0.25, 0.3), mat({ color: nuance(lieu.accent, 0.45) }), 0, HAUTEUR - 0.12, Z_MUR + 0.15); // corniche
-  ajouter(new THREE.BoxGeometry(LARGEUR, 0.08, 0.16), mat({ color: nuance(lieu.accent, 0.7) }), 0, 1.04, Z_MUR + 0.14);           // cimaise
-
-  // Tapis de sortie, à l'avant de la pièce
-  const sortie = { x: 0, z: PROFONDEUR / 2 - 0.4 };
-  const tapis = ajouter(new THREE.PlaneGeometry(2.6, 1.4), mat({ color: nuance(lieu.accent, 0.6) }), sortie.x, 0.015, sortie.z, false);
-  tapis.rotation.x = -Math.PI / 2;
+  // ---------- Mur, sol, tableau ----------
+  const { groupe: tableau, style } = creerTableau(lieu.cle, graine);
+  tableau.position.set(0, Y_TABLEAU, 0);
+  scene.add(tableau);
+  const mur = new THREE.Mesh(planDense(22, 10), new THREE.MeshStandardMaterial({ map: style.mur(), roughness: 0.95 }));
+  mur.position.set(0, 4, -0.1);
+  mur.receiveShadow = true;
+  scene.add(mur);
+  const sol = new THREE.Mesh(new THREE.PlaneGeometry(22, 12), new THREE.MeshStandardMaterial({ color: '#4a2e20', roughness: 1 }));
+  sol.rotation.x = -Math.PI / 2; sol.position.z = 5; sol.receiveShadow = true;
+  scene.add(sol);
 
   // ---------- Lumières ----------
-  scene.add(new THREE.HemisphereLight('#fff1d8', '#4a2e20', 0.8));
-  const principale = new THREE.DirectionalLight('#ffe2b8', 2.0);
-  principale.position.set(-5, 14, 9);
-  principale.target.position.set(0, 0, -2);
+  scene.add(new THREE.HemisphereLight('#fff1d8', '#4a2e20', 0.85));
+  const principale = new THREE.DirectionalLight('#ffe2b8', 2.1);
+  principale.position.set(-3, 7, 7);
+  principale.target.position.set(0, Y_TABLEAU, 0);
   principale.castShadow = true;
-  principale.shadow.mapSize.set(2048, 2048);
-  Object.assign(principale.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 1, far: 40 });
-  principale.shadow.bias = -0.0004;
-  principale.shadow.normalBias = 0.03;
+  principale.shadow.mapSize.set(1024, 1024);
+  Object.assign(principale.shadow.camera, { left: -6, right: 6, top: 5, bottom: -5, near: 1, far: 20 });
+  principale.shadow.bias = -0.0005;
+  principale.shadow.normalBias = 0.02;
   scene.add(principale, principale.target);
 
-  const lumieresAnimees = []; // torches qui vacillent
-  const appliques = lieu.cle === 'concert' ? ['#e0507a', '#4c8cc8'] : [style.lampe, style.lampe];
+  const torches = [];
   [-1, 1].forEach((cote, i) => {
-    const x = cote * (LARGEUR / 2 - 0.9);
-    ajouter(new THREE.BoxGeometry(0.3, 0.42, 0.22), new THREE.MeshStandardMaterial({ color: appliques[i], emissive: appliques[i], emissiveIntensity: 1.2 }), x, 3.9, Z_MUR + 0.15, false);
-    const lumiere = new THREE.PointLight(appliques[i], lieu.cle === 'concert' ? 12 : 5, 10, 2);
-    lumiere.position.set(x, 3.9, Z_MUR + 0.8);
+    const couleur = i && style.lampe2 ? style.lampe2 : style.lampe;
+    const x = cote * (LARGEUR_TABLEAU / 2 + 0.9);
+    const applique = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.4, 0.2), new THREE.MeshStandardMaterial({ color: couleur, emissive: couleur, emissiveIntensity: 1.4 }));
+    applique.position.set(x, Y_TABLEAU + 1.2, 0.05);
+    scene.add(applique);
+    const lumiere = new THREE.PointLight(couleur, style.lampe2 ? 9 : 4.5, 8, 2);
+    lumiere.position.set(x, Y_TABLEAU + 1.2, 0.8);
     scene.add(lumiere);
-    if (lieu.cle === 'colisee') lumieresAnimees.push({ lumiere, base: 5, phase: i * 2.1 });
+    if (style.torches) torches.push({ lumiere, base: 4.5, phase: i * 2.1 });
   });
 
-  // ---------- Accessoires propres à chaque lieu ----------
-  if (lieu.cle === 'banque') {
-    [-1, 1].forEach((cote) => ajouter(new THREE.CylinderGeometry(0.35, 0.42, HAUTEUR - 0.3, 12), mat({ map: TEX.pierre() }), cote * (LARGEUR / 2 - 0.45), (HAUTEUR - 0.3) / 2, Z_MUR + 0.45));
-  }
-  if (lieu.cle === 'concert') {
-    ajouter(boiteDense(LARGEUR, 0.18, 1.0), mat({ map: TEX.parquet('#2a1a14') }), 0, 0.09, Z_MUR + 0.5); // bord de scène
-  }
+  // ---------- Le perso, de dos, au premier plan ----------
+  const perso = creerLutin(imageDos);
+  perso.position.set(0, 0, Z_PERSO);
+  scene.add(perso);
 
-  // ---------- Contenu ----------
+  // ---------- Contenu épinglé ----------
   const { elements } = lireContenu(lieu.cle);
   const preuves = elements.filter((e) => e.role === 'preuve');
-  const decor = elements.filter((e) => e.role === 'deco');
-  const collisions = creerCollisions({ xMin: -LARGEUR / 2 + 0.7, xMax: LARGEUR / 2 - 0.7, zMin: Z_MUR + 0.95, zMax: PROFONDEUR / 2 - 0.2 });
+  // Les éléments de décor sont glissés entre les preuves, à des places tirées au hasard (toujours les mêmes).
+  const r = (() => { let s = graine; return () => (s = (s * 9301 + 49297) % 233280) / 233280; })();
+  const ordre = [...preuves];
+  elements.filter((e) => e.role === 'deco').forEach((d) => ordre.splice(Math.floor(r() * (ordre.length + 1)), 0, d));
 
-  // Objets de décor posés au sol, le long des murs de côté
-  decor.forEach((element, i) => {
-    const cote = i % 2 ? 1 : -1, rang = Math.floor(i / 2);
-    const x = cote * (LARGEUR / 2 - 1.3), z = Z_MUR + 1.3 + rang * 2.4;
-    const objet = creerObjetDecor(element);
-    objet.position.set(x, 0, z);
-    scene.add(objet);
-    collisions.ajouterCercle(x, z, 0.55);
-  });
-
-  // Éléments de preuve accrochés au mur du fond, disposés automatiquement
-  const largeurMur = LARGEUR - (decor.length ? 5.2 : 2.4);
-  const fabriques = preuves.map((element) => ({ element, ...creerElementMural(element, lieu.accent) }));
-  const positions = disposer(fabriques, largeurMur, 1.35, HAUTEUR - 0.45);
+  const fabriques = ordre.map((element) => ({ element, ...creerElement(element, lieu.accent) }));
+  const positions = disposerEnVrac(fabriques, LARGEUR_TABLEAU - 0.4, HAUTEUR_TABLEAU - 0.35, graine);
   const cliquables = [];
-  const accroches = fabriques.map((f, i) => {
-    const { x, y, echelle } = positions[i];
-    f.groupe.position.set(x, y, Z_MUR + 0.12);
-    f.groupe.scale.setScalar(echelle);
-    scene.add(f.groupe);
+  const epingles = fabriques.map((f, i) => {
+    const pos = positions[i];
+    const support = new THREE.Group(); // porte l'élément et sa fixation, c'est lui qu'on anime
+    support.add(f.groupe);
+    const fixation = creerFixation(style, style.couleursFixation[i % style.couleursFixation.length], f.largeur);
+    support.add(fixation);
+    const placerFixation = () => fixation.position.set(0, (f.groupe.userData.hautRelatif ?? f.hauteur / 2) - 0.1, 0.03);
+    placerFixation();
+    f.groupe.userData.surRedimension = placerFixation; // une vraie image peut changer la hauteur de l'élément
+    support.position.set(pos.x, Y_TABLEAU + pos.y, 0.07 + i * 0.006); // léger décalage pour éviter les superpositions
+    support.rotation.z = pos.angle;
+    support.scale.setScalar(pos.echelle);
+    scene.add(support);
     cliquables.push(...f.cliquables);
-    return { element: f.element, index: i, x, y, demiLargeur: (f.largeur * echelle) / 2 };
+    return {
+      element: f.element, support, fixation,
+      cible: { x: pos.x, y: Y_TABLEAU + pos.y, z: support.position.z, echelle: pos.echelle },
+      delai: 0.45 + i * 0.09, survol: 0,
+      indexPreuve: preuves.indexOf(f.element),
+    };
   });
+  const epinglesPreuves = epingles.filter((e) => e.indexPreuve >= 0).sort((a, b) => a.indexPreuve - b.indexPreuve);
 
-  // Élément le plus proche du perso, quand il se tient près du mur
-  function elementProche(position) {
-    if (position.z > Z_MUR + 3.2) return null;
-    let meilleur = null, ecart = Infinity;
-    for (const a of accroches) {
-      const d = Math.abs(a.x - position.x) - a.demiLargeur;
-      if (d < 0.5 && d < ecart) { ecart = d; meilleur = a; }
+  // ---------- Fils tendus entre les preuves, dans l'ordre du fichier (style tableau d'enquêteur) ----------
+  const fils = [];
+  if (style.fil) {
+    const point = (e) => new THREE.Vector3(e.cible.x, e.cible.y + 0.45 * e.cible.echelle, 0.16);
+    for (let i = 0; i + 1 < epinglesPreuves.length; i++) {
+      const fil = creerFil(point(epinglesPreuves[i]), point(epinglesPreuves[i + 1]), style.fil);
+      fil.visible = false;
+      scene.add(fil);
+      fils.push(fil);
     }
-    return meilleur;
+  }
+  const finEpinglage = epingles.length ? epingles[epingles.length - 1].delai + 0.4 : 0.4;
+
+  // ---------- Animation ----------
+  // t : secondes écoulées depuis l'entrée dans le lieu. cadrage : objet du cadrage caméra à faire avancer.
+  function animer(t, dt, cadrage, temps) {
+    // Caméra qui avance vers le tableau
+    cadrage.z = CAMERA_INTERIEUR.z + RECUL_ENTREE * (1 - lisser(t / 1.2));
+    cadrage.y = CAMERA_INTERIEUR.y + 0.35 * (1 - lisser(t / 1.2));
+    // Le perso entre par le bas de l'image
+    perso.position.y = -0.9 * (1 - lisser((t - 0.1) / 0.6));
+
+    // Chaque élément arrive un peu plus grand et décollé du tableau, puis vient se plaquer avec un petit rebond.
+    for (const e of epingles) {
+      const k = (t - e.delai) / 0.32;
+      e.support.visible = k > 0;
+      const arrivee = rebond(k);
+      e.survol += ((e.estSurvole ? 1 : 0) - e.survol) * Math.min(1, dt * 12);
+      e.support.position.z = e.cible.z + (1 - arrivee) * 0.9 + e.survol * 0.12;
+      e.support.position.y = e.cible.y + (1 - arrivee) * 0.25;
+      e.support.scale.setScalar(e.cible.echelle * (1 + (1 - arrivee) * 0.35 + e.survol * 0.07));
+      // La fixation apparaît juste après que l'élément touche le tableau
+      e.fixation.scale.setScalar(rebond((t - e.delai - 0.25) / 0.2) || 0.0001);
+    }
+    // Les fils se tendent une fois tout épinglé
+    fils.forEach((fil, i) => {
+      const k = lisser((t - finEpinglage - i * 0.12) / 0.3);
+      fil.visible = k > 0;
+      fil.scale.y = Math.max(0.0001, fil.userData.longueur * k);
+    });
+    torches.forEach((l) => { l.lumiere.intensity = l.base * (0.85 + 0.15 * Math.sin(temps * 9 + l.phase) * Math.sin(temps * 5.3 + l.phase)); });
   }
 
-  // Point où le perso se place pour regarder un élément
-  const pointDeVue = (accroche) => ({ x: THREE.MathUtils.clamp(accroche.x, collisions.limites.xMin, collisions.limites.xMax), z: Z_MUR + 1.3 });
-
-  const navigation = creerNavigation(collisions);
-
-  function animer(temps) {
-    lumieresAnimees.forEach((l) => { l.lumiere.intensity = l.base * (0.85 + 0.15 * Math.sin(temps * 9 + l.phase) * Math.sin(temps * 5.3 + l.phase)); });
+  // Met en avant un élément (survol de la souris ou sélection au clavier), ou aucun.
+  function survoler(element) {
+    for (const e of epingles) e.estSurvole = e.element === element;
   }
 
   return {
-    lieu, scene, sol, collisions, navigation, cliquables, animer,
-    preuves, accroches, elementProche, pointDeVue,
-    entree: { x: 0, z: PROFONDEUR / 2 - 2.3 }, sortie,
+    lieu, scene, cliquables, preuves, animer, survoler,
+    centreTableau: new THREE.Vector3(0, Y_TABLEAU, 0),
   };
 }

@@ -184,9 +184,11 @@ export function creerPostTraitement(rendu, scene, camera) {
   composeur.addPass(etalonnage);
   composeur.addPass(new OutputPass());
 
+  let flouImpose = null; // réglages de flou propres aux intérieurs (null = ceux de la ville)
+
   function appliquerReglages() {
     const u = passeScene.materiau.uniforms;
-    const F = REGLAGES.flou, B = REGLAGES.brume, I = REGLAGES.image, H = REGLAGES.bloom;
+    const F = flouImpose ?? REGLAGES.flou, B = REGLAGES.brume, I = REGLAGES.image, H = REGLAGES.bloom;
     const haute = REGLAGES.qualite === 'haute';
     u.zoneAvant.value = F.zoneAvant;
     u.zoneArriere.value = F.zoneArriere;
@@ -228,6 +230,12 @@ export function creerPostTraitement(rendu, scene, camera) {
     passeScene.scene = nouvelle;
   }
 
+  // Impose des réglages de flou (intérieurs), ou revient à ceux de la ville avec null.
+  function definirFlou(reglages) {
+    flouImpose = reglages;
+    appliquerReglages();
+  }
+
   appliquerReglages();
-  return { composeur, appliquerReglages, redimensionner, definirMiseAuPoint, definirScene, rendre: () => composeur.render() };
+  return { composeur, appliquerReglages, redimensionner, definirMiseAuPoint, definirScene, definirFlou, rendre: () => composeur.render() };
 }

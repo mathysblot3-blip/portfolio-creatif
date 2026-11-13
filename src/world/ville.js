@@ -19,8 +19,8 @@ export function construireVille(scene) {
   const limites = { xMin: -24, xMax: 24, zMin: -7, zMax: 9.5 };
   const collisions = creerCollisions(limites);
   const cliquables = [];
-  const portes = [];     // { lieu, x, z } : point d'arrêt devant chaque porte
-  const enseignes = [];
+  const portes = [];     // { lieu, x, z, retour } : point où l'on touche la porte, et point où l'on réapparaît en sortant
+  const drapeaux = [];   // tissus qui flottent au vent
 
   const ajouter = (forme, materiau, x, y, z, ombre = true) => {
     const objet = new THREE.Mesh(forme, materiau);
@@ -53,9 +53,9 @@ export function construireVille(scene) {
     if (lieu.forme === 'ronde') collisions.ajouterCercle(lieu.x, lieu.z, lieu.largeur / 2 + 0.2);
     else collisions.ajouterRectangle(lieu.x, lieu.z, lieu.largeur + 0.3, lieu.profondeur + 0.3, angle);
     batiment.obstacles.forEach((o) => { const m = versMonde(o.x, o.z); collisions.ajouterCercle(m.x, m.z, o.r); });
-    portes.push({ lieu, ...versMonde(batiment.porte.x, batiment.porte.z) });
+    portes.push({ lieu, ...versMonde(batiment.porte.x, batiment.porte.z), retour: versMonde(batiment.retour.x, batiment.retour.z) });
     cliquables.push(...batiment.cliquables);
-    enseignes.push(...batiment.enseignes);
+    batiment.groupe.traverse((o) => { if (o.userData.flotte) drapeaux.push(o); });
   });
 
   // ---------- Fontaine centrale ----------
@@ -145,19 +145,8 @@ export function construireVille(scene) {
     }
     nuage.attributes.position.needsUpdate = true;
     eau.material.map.offset.set(temps * 0.03, temps * 0.02);
+    drapeaux.forEach((d, i) => { d.rotation.y = Math.sin(temps * 2.4 + i) * 0.35; });
   }
 
-  // La police pixel arrive après le premier dessin : on redessine alors le texte des enseignes.
-  function redessinerEnseignes() {
-    enseignes.forEach((e) => {
-      const g = e.texture.image.getContext('2d'), l = e.texture.image.width, h = 24;
-      g.fillStyle = '#14101a'; g.fillRect(4, 4, l - 8, h - 8);
-      g.fillStyle = '#f4ecd8'; g.font = '8px "Press Start 2P", monospace';
-      g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(e.texte, l / 2, h / 2 + 1);
-      e.texture.needsUpdate = true;
-    });
-  }
-
-  return { lieux: LIEUX, collisions, limites, cliquables, portes, sol, fontaine, animer, redessinerEnseignes };
+  return { lieux: LIEUX, collisions, limites, cliquables, portes, sol, fontaine, animer };
 }

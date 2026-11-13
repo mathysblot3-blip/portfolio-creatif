@@ -1,11 +1,11 @@
 # Guide : ajouter ou modifier le contenu du Portfolio Créatif
 
-Ce guide explique comment changer une photo, une vidéo ou un texte sur le mur d'un bâtiment.
-**Aucune ligne de code à toucher, aucun outil d'IA nécessaire.**
+Ce guide explique comment changer une photo, une vidéo ou un texte sur le tableau d'un bâtiment.
+**Aucune ligne de code à toucher.** Tu peux le faire seul, ou demander à Claude (Opus) de le faire : aucun outil de génération d'images n'est nécessaire.
 
 ## Où se trouve quoi
 
-| Lieu | Texte du mur | Dossier des photos et vidéos |
+| Lieu | Texte du tableau | Dossier des photos et vidéos |
 |---|---|---|
 | L'École | `contenu/ecole.md` | `public/medias/ecole/` |
 | L'Entreprise | `contenu/entreprise.md` | `public/medias/entreprise/` |
@@ -38,18 +38,18 @@ fichier: guitare.png
 
 | Ligne | Rôle |
 |---|---|
-| `# PREUVES` | Les éléments qui suivent prouvent quelque chose (diplômes, photos, réalisations). Ils sont accrochés au mur, et on peut les regarder en grand |
-| `# DÉCOR` | Les éléments qui suivent sont purement visuels. Ils sont posés au sol, sur les côtés de la pièce |
-| `## Titre` | Commence un nouvel élément. Le titre s'affiche sur sa plaque et dans la visionneuse |
-| `forme:` | Aspect sur le mur : `cadre` (photo encadrée), `diplome` (cadre doré), `affiche` (papier punaisé), `note` (texte écrit sur un papier, sans fichier), `ecran` (vidéo), `objet` (décor) |
+| `# PREUVES` | Les éléments qui suivent prouvent quelque chose (diplômes, photos, réalisations). Ils sont épinglés au tableau, et un clic les affiche en grand |
+| `# DÉCOR` | Les éléments qui suivent sont purement visuels. Ils sont épinglés au tableau entre les preuves, mais on ne peut pas cliquer dessus |
+| `## Titre` | Commence un nouvel élément. Le titre s'affiche au survol de la souris et dans la visionneuse |
+| `forme:` | Aspect sur le tableau : `cadre` (photo encadrée), `diplome` (cadre doré), `affiche` (papier punaisé), `note` (texte écrit sur un papier, sans fichier), `ecran` (vidéo), `objet` (décor) |
 | `fichier:` | Nom du fichier déposé dans le dossier du lieu. Photo : `.jpg`, `.png` ou `.webp`. Vidéo : `.mp4` ou `.webm` |
-| `vignette:` | Pour une vidéo seulement : image affichée sur l'écran du mur |
+| `vignette:` | Pour une vidéo seulement : image affichée sur le tableau |
 | `date:` | Facultatif, affiché dans la visionneuse |
 | `taille:` | Facultatif : `petit` ou `grand` |
 | `lien:` | Facultatif : adresse web complète (commençant par `https://`), affichée en bouton |
 | Autres lignes | La légende |
 
-Les éléments sont **rangés automatiquement** sur le mur, dans l'ordre du fichier. Pour changer l'ordre, déplace le bloc `## ...` plus haut ou plus bas.
+Les éléments sont **disposés automatiquement** sur le tableau, un peu en vrac. Les fils relient les preuves dans l'ordre du fichier. Pour changer l'ordre, déplace le bloc `## ...` plus haut ou plus bas.
 
 Les marques `[CONTENU]` et `[À CONFIRMER]` apparaissent surlignées dans la visionneuse : remplace-les par ton texte.
 

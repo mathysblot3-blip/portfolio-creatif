@@ -41,6 +41,21 @@ canvas#vue { position: fixed; inset: 0; width: 100%; height: 100%; display: bloc
 }
 #notification.visible { opacity: 1; }
 
+/* Titre de l'élément survolé, qui suit la souris */
+#infobulle {
+  position: fixed; z-index: 8; pointer-events: none; transform: translate(14px, 14px) skewX(-8deg);
+  background: var(--papier); color: var(--encre); padding: 7px 12px; font-family: var(--titre); font-size: 18px;
+  letter-spacing: .5px; box-shadow: 4px 4px 0 var(--accent); white-space: nowrap;
+}
+
+/* Bouton de sortie des intérieurs, utilisable à la souris */
+#bouton-sortir {
+  position: fixed; right: 24px; bottom: 22px; z-index: 6; font-family: var(--pixel); font-size: 10px;
+  color: var(--papier); background: var(--encre); border: 2px solid var(--papier); padding: 11px 14px;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--acc, var(--accent));
+}
+#bouton-sortir:hover { background: var(--acc, var(--accent)); }
+
 /* ---------- Volet de transition : une bande diagonale qui traverse l'écran ---------- */
 #volet {
   position: fixed; inset: -10% -60%; z-index: 30; pointer-events: none;
