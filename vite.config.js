@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   // Chemins relatifs : le site fonctionne quelle que soit l'adresse GitHub Pages
-  // (par exemple https://ton-compte.github.io/le-quartier/).
+  // (par exemple https://ton-compte.github.io/portfolio-creatif/).
   base: './',
   build: {
     target: 'es2022',

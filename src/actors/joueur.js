@@ -2,6 +2,7 @@
 // LE JOUEUR
 // Gère le déplacement du personnage : au clavier, ou en suivant un chemin après un clic.
 // Choisit aussi l'image à afficher selon la direction et l'avancée du pas.
+// Le même personnage passe de la ville à l'intérieur des lieux avec placer().
 // =====================================================================
 import * as THREE from 'three';
 import { creerLutin, imagesPersoProvisoire } from './lutin.js';
@@ -9,12 +10,13 @@ import { creerLutin, imagesPersoProvisoire } from './lutin.js';
 const VITESSE = 5;          // unités par seconde
 const DUREE_IMAGE = 0.14;   // durée d'une image de marche, en secondes
 
-export function creerJoueur(scene, collisions, navigation) {
+export function creerJoueur(scene, collisionsDepart, navigationDepart) {
   const images = imagesPersoProvisoire();
   const lutin = creerLutin(images.face[0]);
   lutin.position.set(0, 0, 6.5);
   scene.add(lutin);
 
+  let collisions = collisionsDepart, navigation = navigationDepart;
   const direction = new THREE.Vector3(); // sens de la marche à l'image courante (nul à l'arrêt)
   let orientation = 'face', miroir = false, image = 0, chrono = 0;
   let chemin = [];        // points restant à atteindre après un clic
@@ -25,9 +27,22 @@ export function creerJoueur(scene, collisions, navigation) {
     const trajet = navigation.trouverChemin(lutin.position.x, lutin.position.z, x, z);
     chemin = trajet ?? [];
     arrivee = trajet ? unefoisArrive : null;
+    // Déjà sur place : l'action se déclenche tout de suite.
+    if (trajet && !trajet.length && unefoisArrive) { arrivee = null; unefoisArrive(); }
   }
 
   function arreter() { chemin = []; arrivee = null; }
+
+  // Déplace le perso dans une autre scène (ville ou pièce), avec ses obstacles.
+  function placer(nouvelleScene, nouvellesCollisions, nouvelleNavigation, x, z, regard = 'face') {
+    nouvelleScene.add(lutin); // un objet ne peut appartenir qu'à une scène : il quitte l'ancienne
+    collisions = nouvellesCollisions;
+    navigation = nouvelleNavigation;
+    lutin.position.set(x, 0, z);
+    orientation = regard; miroir = false; image = 0;
+    arreter();
+    lutin.userData.afficher(images[orientation][0], false);
+  }
 
   function mettreAJour(dt, touches) {
     direction.set(0, 0, 0);
@@ -69,5 +84,8 @@ export function creerJoueur(scene, collisions, navigation) {
     return direction;
   }
 
-  return { lutin, position: lutin.position, allerVers, arreter, mettreAJour };
+  // Tourne le perso sans le déplacer (par exemple face au mur quand il regarde un élément).
+  function regarder(nouvelle) { orientation = nouvelle; miroir = false; }
+
+  return { lutin, position: lutin.position, allerVers, arreter, placer, regarder, mettreAJour };
 }

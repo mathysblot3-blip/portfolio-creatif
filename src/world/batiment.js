@@ -2,7 +2,8 @@
 // BÂTIMENTS
 // Construit un bâtiment à partir d'une entrée de places.json.
 // Tout est décrit dans le repère du bâtiment : le sol est à y = 0, la façade regarde vers +z.
-// Le quartier se charge ensuite de le placer et de le tourner.
+// La ville se charge ensuite de le placer et de le tourner.
+// Un lieu "rond" (forme: "ronde" dans places.json) devient une arène circulaire à arcades.
 // Les formes et textures sont provisoires : elles seront remplacées par tes dessins.
 // =====================================================================
 import * as THREE from 'three';
@@ -52,14 +53,33 @@ export function creerBatiment(lieu, index) {
   const facade = p / 2; // position de la façade le long de l'axe z
 
   // ---------- Volume principal ----------
-  const mur = mat({ map: MURS[lieu.style](lieu.mur, 20 + index) });
+  const rond = lieu.forme === 'ronde';
   const tuiles = TEX.toit(lieu.toit, 40 + index);
   tuiles.repeat.set(1 / UNITES_PAR_TUILE, 1 / UNITES_PAR_TUILE);
   const toit = mat({ map: tuiles });
-  poser(boiteDense(l + 0.3, 0.5, p + 0.3), M.pierre, 0, 0.25, 0);     // soubassement en pierre
-  poser(boiteDense(l, h, p), mur, 0, h / 2, 0, { clic: true });
+  let mur;
 
-  if (lieu.fronton) {
+  if (rond) {
+    // Arène circulaire ouverte vers le ciel : façade à arcades, gradins et sable à l'intérieur.
+    const r = l / 2, tour = 2 * Math.PI * r;
+    const arcades = TEX.arcades(lieu.mur);
+    arcades.repeat.set(Math.round(tour / 2.2), h / 2.6);
+    mur = mat({ map: arcades, side: THREE.DoubleSide });
+    poser(new THREE.CylinderGeometry(r + 0.2, r + 0.25, 0.5, 32), M.pierre, 0, 0.25, 0);
+    poser(new THREE.CylinderGeometry(r, r, h, 32, 1, true), mur, 0, h / 2, 0, { clic: true });
+    poser(new THREE.CylinderGeometry(r + 0.15, r + 0.15, 0.3, 32, 1, true), M.pierre, 0, h, 0);
+    poser(new THREE.CylinderGeometry(r - 0.7, r - 0.2, 2.2, 32, 1, true), mat({ color: nuance(lieu.mur, 0.6), side: THREE.DoubleSide }), 0, 1.1, 0); // gradins
+    const sable = poser(new THREE.CircleGeometry(r - 0.6, 32), mat({ map: TEX.sable() }), 0, 0.3, 0, { ombre: false });
+    sable.rotation.x = -Math.PI / 2;
+  } else {
+    mur = mat({ map: MURS[lieu.style](lieu.mur, 20 + index) });
+    poser(boiteDense(l + 0.3, 0.5, p + 0.3), M.pierre, 0, 0.25, 0);     // soubassement en pierre
+    poser(boiteDense(l, h, p), mur, 0, h / 2, 0, { clic: true });
+  }
+
+  if (rond) {
+    // pas de toit
+  } else if (lieu.fronton) {
     // Toit tourné d'un quart de tour : le triangle (fronton) est en façade et déborde au-dessus des colonnes.
     const fronton = poser(toitDeuxPans(p + 2.2, l, 2.4), [M.pierre, toit], 0, h, 1.1);
     fronton.rotation.y = Math.PI / 2;
@@ -77,11 +97,12 @@ export function creerBatiment(lieu, index) {
   const texteEnseigne = TEX.enseigne(sansAccent(lieu.nom), lieu.accent);
   enseignes.push({ texture: texteEnseigne, texte: sansAccent(lieu.nom), couleur: lieu.accent });
   const faceEnseigne = mat({ map: texteEnseigne });
-  // Une boîte a 6 faces : seule la face avant (la 5e) porte le texte.
-  poser(new THREE.BoxGeometry(4, 0.75, 0.12), [M.bois, M.bois, M.bois, M.bois, faceEnseigne, M.bois], 0, 2.9, facade + 0.1);
+  // Une boîte a 6 faces : seule la face avant (la 5e) porte le texte. Sa largeur suit celle du texte.
+  const largeurEnseigne = 4 * (texteEnseigne.image.width / 128);
+  poser(new THREE.BoxGeometry(largeurEnseigne, 0.75, 0.12), [M.bois, M.bois, M.bois, M.bois, faceEnseigne, M.bois], 0, 2.9, facade + 0.1);
 
   // ---------- Blason suspendu à une potence ----------
-  const xBlason = l / 2 - 0.7;
+  const xBlason = rond ? 1.9 : Math.max(l / 2 - 0.7, largeurEnseigne / 2 + 0.55);
   poser(new THREE.BoxGeometry(0.08, 0.08, 1.0), M.fer, xBlason, 4.0, facade + 0.5);
   poser(new THREE.PlaneGeometry(0.8, 1.0), mat({ map: TEX.blason(lieu.accent), alphaTest: 0.5, side: THREE.DoubleSide }), xBlason, 3.4, facade + 0.85);
 
@@ -93,9 +114,9 @@ export function creerBatiment(lieu, index) {
     [-1, 1].forEach((cote) => poser(new THREE.BoxGeometry(0.38, 1.25, 0.06), volet, x + cote * 0.72, y, facade + 0.03));
   };
   const xCote = l / 2 - 1.7;
-  if (lieu.signature !== 'atelier') fenetre(-xCote, 1.85); // l'Atelier a une vitrine à cet endroit
-  fenetre(xCote, 1.85);
-  if (lieu.etage !== false && h >= 5.2) {
+  if (!rond && lieu.signature !== 'atelier') fenetre(-xCote, 1.85); // l'Atelier a une vitrine à cet endroit
+  if (!rond) fenetre(xCote, 1.85);
+  if (!rond && h >= 5.2) {
     const nombre = l >= 8 ? 4 : 3;
     for (let i = 0; i < nombre; i++) fenetre((i - (nombre - 1) / 2) * ((l - 2.4) / (nombre - 1)), 4.45);
   }
@@ -110,7 +131,7 @@ export function creerBatiment(lieu, index) {
     obstacles.push({ x, z, r: taille * 0.62 });
   };
 
-  if (lieu.signature === 'comptoir') {
+  if (lieu.signature === 'entreprise') {
     // Auvent rayé au-dessus d'un étal, tonneaux et caisse
     const toile = poser(new THREE.PlaneGeometry(2.6, 1.7), mat({ map: TEX.auvent(nuance(lieu.accent, 0.9)), side: THREE.DoubleSide }), xCote + 0.2, 2.15, facade + 0.75);
     toile.rotation.x = -1.15;
@@ -119,13 +140,13 @@ export function creerBatiment(lieu, index) {
     caisse(l / 2 - 2.1, facade + 0.6, 0.7);
   }
 
-  if (lieu.signature === 'academie') {
+  if (lieu.signature === 'ecole') {
     // Horloge sous le toit et deux pilastres de pierre
     poser(new THREE.PlaneGeometry(1.4, 1.4), mat({ map: TEX.horloge(), alphaTest: 0.5 }), 0, 5.95, facade + 0.03, { ombre: false });
     [-1, 1].forEach((cote) => poser(boiteDense(0.55, h, 0.35), M.pierre, cote * (l / 2 - 0.27), h / 2, facade + 0.1));
   }
 
-  if (lieu.signature === 'bourse') {
+  if (lieu.signature === 'banque') {
     // Quatre colonnes, un entablement et un perron
     [-3.7, -1.75, 1.75, 3.7].forEach((x) => {
       poser(new THREE.CylinderGeometry(0.3, 0.36, h - 0.5, 10), M.pierre, x, (h - 0.5) / 2, facade + 1.5);
@@ -135,7 +156,7 @@ export function creerBatiment(lieu, index) {
     poser(boiteDense(l, 0.1, 2.2), M.pierre, 0, 0.05, facade + 1.1);
   }
 
-  if (lieu.signature === 'studio') {
+  if (lieu.signature === 'concert') {
     // Néon rose, deux enceintes et une lumière colorée
     const neon = new THREE.MeshStandardMaterial({ color: lieu.accent, emissive: lieu.accent, emissiveIntensity: 3 });
     poser(new THREE.BoxGeometry(3.4, 0.1, 0.06), neon, 0, 3.42, facade + 0.14, { ombre: false });
@@ -160,12 +181,17 @@ export function creerBatiment(lieu, index) {
     obstacles.push({ x: l / 2 - 1.2, z: facade + 0.6, r: 0.7 });
   }
 
-  if (lieu.signature === 'arene') {
-    // Deux bannières et du matériel entreposé
+  if (lieu.signature === 'colisee') {
+    // Deux mâts portant des bannières de part et d'autre de l'entrée, et du matériel entreposé
     const banniere = mat({ map: TEX.banniere(lieu.accent), alphaTest: 0.5, side: THREE.DoubleSide });
-    [-1, 1].forEach((cote) => poser(new THREE.PlaneGeometry(0.8, 2.4), banniere, cote * (l / 2 - 0.6), h - 1.3, facade + 0.08));
-    caisse(-(l / 2 - 0.8), facade + 0.75);
-    caisse(-(l / 2 - 1.9), facade + 0.7, 0.7);
+    [-1, 1].forEach((cote) => {
+      const x = cote * 2.4, z = facade + 0.4;
+      poser(new THREE.CylinderGeometry(0.06, 0.06, 4.6, 6), M.fer, x, 2.3, z);
+      poser(new THREE.PlaneGeometry(0.8, 2.4), banniere, x, 3.2, z + 0.08);
+      obstacles.push({ x, z, r: 0.3 });
+    });
+    caisse(-3.2, facade - 0.2);
+    caisse(-3.6, facade - 1.2, 0.7);
   }
 
   // Point devant la porte où le perso s'arrête pour entrer (dans le repère du bâtiment).

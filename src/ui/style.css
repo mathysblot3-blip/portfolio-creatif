@@ -41,6 +41,72 @@ canvas#vue { position: fixed; inset: 0; width: 100%; height: 100%; display: bloc
 }
 #notification.visible { opacity: 1; }
 
+/* ---------- Volet de transition : une bande diagonale qui traverse l'écran ---------- */
+#volet {
+  position: fixed; inset: -10% -60%; z-index: 30; pointer-events: none;
+  background: linear-gradient(90deg, var(--acc, var(--accent)) 0 8%, var(--encre) 8% 92%, var(--acc, var(--accent)) 92%);
+  transform: translateX(-130%) skewX(-18deg);
+}
+#volet.entre { animation: voletEntre .38s cubic-bezier(.7, 0, .3, 1) forwards; }
+#volet.sort  { animation: voletSort .42s cubic-bezier(.7, 0, .3, 1) forwards; }
+@keyframes voletEntre { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(0) skewX(-18deg); } }
+@keyframes voletSort  { from { transform: translateX(0) skewX(-18deg); } to { transform: translateX(130%) skewX(-18deg); } }
+
+/* ---------- Visionneuse (style anime : bandes diagonales, titre massif) ---------- */
+#visionneuse { position: fixed; inset: 0; z-index: 20; overflow: hidden; --acc: var(--accent); }
+#visionneuse .v-fond { position: absolute; inset: 0; background: rgba(13, 11, 26, .86); animation: fondu .25s ease-out both; }
+#visionneuse .v-bande { position: absolute; top: 0; bottom: 0; transform: skewX(-18deg); pointer-events: none; }
+#visionneuse .b1 { left: -8vw; width: 30vw; background: var(--acc); opacity: .9; animation: glisseG .45s .1s cubic-bezier(.2, .9, .2, 1) both; }
+#visionneuse .b2 { left: 20vw; width: 2.4vw; background: var(--papier); animation: glisseG .45s .16s cubic-bezier(.2, .9, .2, 1) both; }
+#visionneuse .v-tete { position: absolute; left: 4vw; top: 7vh; width: 30vw; animation: glisseG .5s .18s cubic-bezier(.2, .9, .2, 1) both; }
+#visionneuse .v-num { font-family: var(--pixel); font-size: 10px; color: var(--encre); background: var(--papier); padding: 6px 8px; display: inline-block; }
+#visionneuse .v-titre {
+  font-family: var(--titre); font-size: clamp(36px, 5vw, 76px); line-height: .92; color: var(--papier);
+  transform: skewX(-8deg); text-shadow: 5px 5px 0 var(--encre); margin: 14px 0 12px; overflow-wrap: break-word;
+}
+#visionneuse .v-titre.long { font-size: clamp(28px, 3.2vw, 50px); }
+#visionneuse .v-date { font-family: var(--pixel); font-size: 10px; color: var(--encre); background: var(--or); padding: 7px 10px; display: inline-block; }
+#visionneuse .v-corps {
+  position: absolute; left: 38vw; right: 5vw; top: 7vh; bottom: 13vh; background: var(--papier); color: var(--encre);
+  clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%); padding: 4vh 5vw; overflow: auto;
+  display: flex; flex-direction: column; gap: 16px; animation: glisseD .5s .2s cubic-bezier(.2, .9, .2, 1) both;
+}
+#visionneuse .v-media { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+#visionneuse .v-media img, #visionneuse .v-media video { max-width: 100%; max-height: 52vh; display: block; box-shadow: 6px 6px 0 var(--encre); }
+#visionneuse .a-fournir {
+  width: 100%; height: 34vh; border: 3px dashed var(--encre); display: flex; align-items: center; justify-content: center; text-align: center;
+  font-family: var(--pixel); font-size: 10px; line-height: 2.2;
+  background: repeating-linear-gradient(45deg, transparent 0 10px, rgba(13, 11, 26, .06) 10px 20px);
+}
+#visionneuse .a-fournir b { font-family: var(--texte); font-size: 16px; }
+#visionneuse .v-texte { font-size: 16px; line-height: 1.6; max-width: 70ch; }
+#visionneuse mark { background: var(--or); padding: 0 4px; }
+#visionneuse .v-lien {
+  align-self: flex-start; font-family: var(--pixel); font-size: 10px; color: var(--papier); background: var(--encre);
+  padding: 10px 14px; text-decoration: none; box-shadow: 4px 4px 0 var(--acc);
+}
+#visionneuse button {
+  position: absolute; font-family: var(--pixel); color: var(--papier); background: var(--encre); border: 2px solid var(--papier);
+  cursor: pointer; box-shadow: 4px 4px 0 var(--acc); animation: fondu .3s .35s both;
+}
+#visionneuse button:hover { background: var(--acc); }
+#visionneuse .v-fermer { right: 5vw; bottom: 4vh; font-size: 10px; padding: 10px 14px; }
+#visionneuse .v-prec, #visionneuse .v-suiv { bottom: 4vh; font-size: 14px; padding: 8px 14px; }
+#visionneuse .v-prec { left: 38vw; }
+#visionneuse .v-suiv { left: calc(38vw + 64px); }
+#visionneuse.fermeture { animation: disparait .22s ease-in both; }
+@keyframes glisseG { from { transform: translateX(-60vw) skewX(-18deg); opacity: 0; } }
+@keyframes glisseD { from { transform: translateX(60vw); opacity: 0; } }
+@keyframes fondu { from { opacity: 0; } }
+@keyframes disparait { to { opacity: 0; } }
+#visionneuse .v-tete { transform: none; }
+#visionneuse .b1, #visionneuse .b2 { transform: skewX(-18deg); }
+
+/* Accessibilité : moins d'animations si le visiteur l'a demandé à son système */
+@media (prefers-reduced-motion: reduce) {
+  #volet.entre, #volet.sort, #visionneuse * { animation-duration: .01s !important; animation-delay: 0s !important; }
+}
+
 /* Cartouche en haut à gauche */
 #cartouche {
   position: fixed; left: 0; top: 22px; padding: 10px 34px 10px 24px;

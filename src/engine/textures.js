@@ -233,8 +233,9 @@ export const TEX = {
     g.fillStyle = '#f4ecd8'; g.fillRect(6, 4, 4, 6);
   }, { repetable: false }),
 
-  // Enseigne avec le nom du lieu. La police pixel est chargée au démarrage (voir main.js).
-  enseigne: (texte, couleur) => texturePixel(128, 24, (g, l, h) => {
+  // Enseigne avec le nom du lieu. Sa largeur s'adapte à la longueur du texte (8 px par lettre).
+  // La police pixel est chargée au démarrage : le texte est redessiné à ce moment-là (voir ville.js).
+  enseigne: (texte, couleur) => texturePixel(Math.max(128, Math.ceil((texte.length * 8 + 24) / 8) * 8), 24, (g, l, h) => {
     g.fillStyle = '#2a1a14'; g.fillRect(0, 0, l, h);
     g.fillStyle = couleur; g.fillRect(2, 2, l - 4, h - 4);
     g.fillStyle = '#14101a'; g.fillRect(4, 4, l - 8, h - 8);
@@ -242,6 +243,63 @@ export const TEX = {
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(texte, l / 2, h / 2 + 1);
   }, { repetable: false }),
+
+  // ----- Matières des intérieurs -----
+
+  // Parquet : lames de 8 px de large, décalées
+  parquet: (couleur = '#96683f') => texturePixel(64, 64, (g, l, h) => {
+    const r = alea(31);
+    for (let x = 0; x < l; x += 8) {
+      const decalage = ((x / 8) % 3) * 21;
+      for (let y = -64; y < h; y += 64) {
+        const c = nuance(couleur, 0.85 + r() * 0.3);
+        g.fillStyle = c; g.fillRect(x, y + decalage, 8, 64);
+        g.fillStyle = nuance(c, 0.65); g.fillRect(x, y + decalage, 1, 64); g.fillRect(x, y + decalage, 8, 1);
+        g.fillStyle = nuance(c, 1.12); g.fillRect(x + 3, y + decalage + 10, 1, 18);
+      }
+    }
+  }),
+
+  // Dallage en damier (marbre de la banque, carrelage de l'entreprise)
+  damier: (clair, fonce) => texturePixel(64, 64, (g) => {
+    const r = alea(29);
+    for (let y = 0; y < 64; y += 32) for (let x = 0; x < 64; x += 32) {
+      const base = ((x + y) / 32) % 2 ? fonce : clair;
+      g.fillStyle = base; g.fillRect(x, y, 32, 32);
+      for (let i = 0; i < 120; i++) { g.fillStyle = nuance(base, 0.94 + r() * 0.12); g.fillRect(x + ((r() * 32) | 0), y + ((r() * 32) | 0), 1, 1); }
+      g.fillStyle = nuance(base, 0.7); g.fillRect(x, y, 32, 1); g.fillRect(x, y, 1, 32);
+    }
+  }),
+
+  // Sable de l'arène
+  sable: () => texturePixel(64, 64, (g, l, h) => {
+    bruit(g, l, h, '#c0935a', 0.22, 37, 0.6);
+    const r = alea(38);
+    for (let i = 0; i < 30; i++) { g.fillStyle = '#e3c389'; g.fillRect((r() * l) | 0, (r() * h) | 0, 2, 1); }
+  }),
+
+  // Papier peint à rayures verticales
+  rayures: (fond, trait) => texturePixel(64, 64, (g, l, h) => {
+    bruit(g, l, h, fond, 0.06, 41, 0.4);
+    g.fillStyle = trait;
+    for (let x = 4; x < l; x += 16) { g.fillRect(x, 0, 2, h); g.fillRect(x + 5, 0, 1, h); }
+  }),
+
+  // Enduit uni légèrement irrégulier (murs peints)
+  enduit: (couleur, graine = 43) => texturePixel(64, 64, (g, l, h) => bruit(g, l, h, couleur, 0.08, graine, 0.5)),
+
+  // Arcades sur deux étages, pour le Colisée : une arche par tuile
+  arcades: (couleur) => texturePixel(64, 64, (g, l, h) => {
+    bruit(g, l, h, couleur, 0.12, 47, 0.5);
+    const sombre = '#2b2433';
+    g.fillStyle = nuance(couleur, 0.7); g.fillRect(0, 0, l, 3); g.fillRect(0, 30, l, 3);
+    [[6, 36], [6, 4]].forEach(([y0]) => {
+      g.fillStyle = sombre;
+      g.fillRect(18, y0 + 10, 28, 18);
+      g.beginPath(); g.arc(32, y0 + 10, 14, Math.PI, 0); g.fill();
+      g.fillStyle = nuance(couleur, 1.15); g.fillRect(14, y0 + 8, 2, 20); g.fillRect(48, y0 + 8, 2, 20);
+    });
+  }),
 };
 
 // Dégradé du ciel de fin d'après-midi (du haut vers l'horizon). Lissé volontairement : ce n'est pas du pixel art.

@@ -223,6 +223,11 @@ export function creerPostTraitement(rendu, scene, camera) {
     passeScene.materiau.uniforms.miseAuPoint.value = distance;
   }
 
+  // Change la scène dessinée (ville ou intérieur d'un lieu). La caméra reste la même.
+  function definirScene(nouvelle) {
+    passeScene.scene = nouvelle;
+  }
+
   appliquerReglages();
-  return { composeur, appliquerReglages, redimensionner, definirMiseAuPoint, rendre: () => composeur.render() };
+  return { composeur, appliquerReglages, redimensionner, definirMiseAuPoint, definirScene, rendre: () => composeur.render() };
 }

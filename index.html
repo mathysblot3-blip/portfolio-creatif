@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Le Quartier</title>
+  <title>Portfolio Créatif</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Press+Start+2P&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
@@ -14,11 +14,34 @@
   <canvas id="vue"></canvas>
 
   <!-- Interface posée par-dessus la scène -->
-  <div id="cartouche"><b>LE QUARTIER</b><span id="visites">LIEUX VISITES 0/6</span></div>
+  <div id="cartouche"><b>PORTFOLIO CRÉATIF</b><span id="visites">LIEUX VISITES 0/6</span></div>
   <div id="compteur" class="cache">-- i/s</div>
-  <div id="aide">ZQSD / FLECHES : SE DEPLACER<br>CLIC : ALLER ICI · E / ENTREE : ENTRER</div>
+  <div id="aide"></div>
   <div id="invite" class="cache"></div>
   <div id="notification"></div>
+
+  <!-- Visionneuse : un élément du mur affiché en grand -->
+  <div id="visionneuse" class="cache">
+    <div class="v-fond"></div>
+    <div class="v-bande b1"></div>
+    <div class="v-bande b2"></div>
+    <div class="v-tete">
+      <span class="v-num"></span>
+      <h2 class="v-titre"></h2>
+      <span class="v-date"></span>
+    </div>
+    <div class="v-corps">
+      <div class="v-media"></div>
+      <p class="v-texte"></p>
+      <a class="v-lien cache" target="_blank" rel="noopener noreferrer">OUVRIR LE LIEN ↗</a>
+    </div>
+    <button class="v-prec" aria-label="Élément précédent">◀</button>
+    <button class="v-suiv" aria-label="Élément suivant">▶</button>
+    <button class="v-fermer">ECHAP · FERMER</button>
+  </div>
+
+  <!-- Volet diagonal des transitions -->
+  <div id="volet"></div>
 
   <script type="module" src="./src/main.js"></script>
 </body>

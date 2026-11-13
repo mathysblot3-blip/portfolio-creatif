@@ -1,5 +1,5 @@
 // =====================================================================
-// LE QUARTIER
+// LA VILLE
 // Assemble toute la ville : sol, place, fontaine, les lieux de places.json,
 // lampadaires, arbres et décor du premier plan. Enregistre aussi les obstacles.
 // Pour ajouter ou retirer un lieu, il suffit de modifier src/data/places.json.
@@ -14,7 +14,7 @@ import { creerCollisions } from './collisions.js';
 const mat = (options) => new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, ...options });
 const enRadians = (degres) => (degres * Math.PI) / 180;
 
-export function construireQuartier(scene) {
+export function construireVille(scene) {
   // Zone où le perso peut marcher
   const limites = { xMin: -24, xMax: 24, zMin: -7, zMax: 9.5 };
   const collisions = creerCollisions(limites);
@@ -50,7 +50,8 @@ export function construireQuartier(scene) {
     // Passe un point du repère du bâtiment au repère du monde.
     const versMonde = (x, z) => ({ x: lieu.x + x * cos + z * sin, z: lieu.z - x * sin + z * cos });
 
-    collisions.ajouterRectangle(lieu.x, lieu.z, lieu.largeur + 0.3, lieu.profondeur + 0.3, angle);
+    if (lieu.forme === 'ronde') collisions.ajouterCercle(lieu.x, lieu.z, lieu.largeur / 2 + 0.2);
+    else collisions.ajouterRectangle(lieu.x, lieu.z, lieu.largeur + 0.3, lieu.profondeur + 0.3, angle);
     batiment.obstacles.forEach((o) => { const m = versMonde(o.x, o.z); collisions.ajouterCercle(m.x, m.z, o.r); });
     portes.push({ lieu, ...versMonde(batiment.porte.x, batiment.porte.z) });
     cliquables.push(...batiment.cliquables);
@@ -149,7 +150,7 @@ export function construireQuartier(scene) {
   // La police pixel arrive après le premier dessin : on redessine alors le texte des enseignes.
   function redessinerEnseignes() {
     enseignes.forEach((e) => {
-      const g = e.texture.image.getContext('2d'), l = 128, h = 24;
+      const g = e.texture.image.getContext('2d'), l = e.texture.image.width, h = 24;
       g.fillStyle = '#14101a'; g.fillRect(4, 4, l - 8, h - 8);
       g.fillStyle = '#f4ecd8'; g.font = '8px "Press Start 2P", monospace';
       g.textAlign = 'center'; g.textBaseline = 'middle';

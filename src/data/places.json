@@ -1,38 +1,38 @@
 [
   {
-    "cle": "arene", "nom": "L'ARÈNE", "section": "Sport",
+    "cle": "colisee", "nom": "LE COLISÉE", "section": "Sport",
     "x": -24, "z": 2.5, "rotation": 60,
-    "largeur": 7, "hauteur": 5.4, "profondeur": 6,
-    "style": "brique", "mur": "#8f4a3a", "toit": "#4a2e20", "accent": "#b8324f",
-    "etage": false, "signature": "arene"
+    "largeur": 8, "hauteur": 5.2, "profondeur": 8,
+    "forme": "ronde", "mur": "#e3c389", "toit": "#96683f", "accent": "#b8324f",
+    "signature": "colisee"
   },
   {
-    "cle": "comptoir", "nom": "LE COMPTOIR", "section": "Expériences pro",
+    "cle": "entreprise", "nom": "L'ENTREPRISE", "section": "Expériences pro",
     "x": -15.2, "z": -5.6, "rotation": 29,
     "largeur": 7, "hauteur": 5.6, "profondeur": 6,
     "style": "colombage", "mur": "#e3c389", "toit": "#96683f", "accent": "#d89c2a",
-    "signature": "comptoir"
+    "signature": "entreprise"
   },
   {
-    "cle": "academie", "nom": "L'ACADÉMIE", "section": "Parcours scolaire",
+    "cle": "ecole", "nom": "L'ÉCOLE", "section": "Parcours scolaire",
     "x": -5.6, "z": -8.7, "rotation": 9,
     "largeur": 7.5, "hauteur": 6.8, "profondeur": 6,
     "style": "pierre", "mur": "#b9ab9f", "toit": "#24366e", "accent": "#4c8cc8",
-    "signature": "academie"
+    "signature": "ecole"
   },
   {
-    "cle": "bourse", "nom": "LA BOURSE", "section": "Finance",
+    "cle": "banque", "nom": "LA BANQUE", "section": "Finance",
     "x": 5.2, "z": -8.9, "rotation": -9,
     "largeur": 9, "hauteur": 6.4, "profondeur": 6,
     "style": "pierre", "mur": "#e3c389", "toit": "#24503a", "accent": "#3f7a42",
-    "fronton": true, "porteAvance": 2.4, "signature": "bourse"
+    "fronton": true, "porteAvance": 2.4, "signature": "banque"
   },
   {
-    "cle": "studio", "nom": "LE STUDIO", "section": "Musique",
+    "cle": "concert", "nom": "LA SALLE DE CONCERT", "section": "Musique",
     "x": 16, "z": -5.4, "rotation": -29,
     "largeur": 7, "hauteur": 5.6, "profondeur": 6,
     "style": "colombage", "mur": "#c0935a", "toit": "#7e1e3c", "accent": "#e0507a",
-    "signature": "studio"
+    "signature": "concert"
   },
   {
     "cle": "atelier", "nom": "L'ATELIER", "section": "Couture et mode",

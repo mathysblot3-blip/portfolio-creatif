@@ -1,8 +1,8 @@
-"""Palette commune du Quartier : 48 couleurs, 8 rampes de 6 teintes (de la plus sombre à la plus claire).
+"""Palette commune du Portfolio Créatif : 48 couleurs, 8 rampes de 6 teintes (de la plus sombre à la plus claire).
 
 Ce script est la source unique de la palette. Il fabrique :
-  - assets/palette/le-quartier.gpl : à importer dans Aseprite
-  - assets/palette/le-quartier.png : une image de 48 pixels (1 pixel par couleur), importable aussi
+  - assets/palette/portfolio-creatif.gpl : à importer dans Aseprite
+  - assets/palette/portfolio-creatif.png : une image de 48 pixels (1 pixel par couleur), importable aussi
   - assets/palette/apercu.png      : la même chose en grand, pour la regarder
 
 Pour changer une couleur : modifie son code ci-dessous, puis lance  python outils/palette.py
@@ -38,18 +38,18 @@ def main():
     couleurs = [(nom, i, code) for nom, rampe in RAMPES.items() for i, code in enumerate(rampe)]
 
     # 1. Fichier .gpl (format texte des palettes GIMP, lu par Aseprite)
-    lignes = ["GIMP Palette", "Name: Le Quartier", "Columns: 6", "#"]
+    lignes = ["GIMP Palette", "Name: Portfolio Creatif", "Columns: 6", "#"]
     for nom, i, code in couleurs:
         r, v, b = rvb(code)
         lignes.append(f"{r:3d} {v:3d} {b:3d}\t{nom} {i + 1}")
-    (DOSSIER / "le-quartier.gpl").write_text("\n".join(lignes) + "\n", encoding="utf-8")
+    (DOSSIER / "portfolio-creatif.gpl").write_text("\n".join(lignes) + "\n", encoding="utf-8")
 
     # 2. Image d'un pixel par couleur : 6 colonnes (teintes), 8 lignes (rampes)
     image = Image.new("RGB", (6, len(RAMPES)))
     for ligne, rampe in enumerate(RAMPES.values()):
         for colonne, code in enumerate(rampe):
             image.putpixel((colonne, ligne), rvb(code))
-    image.save(DOSSIER / "le-quartier.png")
+    image.save(DOSSIER / "portfolio-creatif.png")
 
     # 3. Aperçu agrandi avec le code de chaque couleur
     case, marge = 96, 150
