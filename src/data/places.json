@@ -1,10 +1,10 @@
 [
   {
-    "cle": "colisee", "nom": "LE COLISÉE", "section": "Sport",
+    "cle": "ecole", "nom": "L'ÉCOLE", "section": "Parcours scolaire",
     "x": -24, "z": 2.5, "rotation": 60,
-    "largeur": 8, "hauteur": 5.2, "profondeur": 8,
-    "forme": "ronde", "mur": "#e3c389", "toit": "#96683f", "accent": "#b8324f",
-    "signature": "colisee"
+    "largeur": 7.5, "hauteur": 6.8, "profondeur": 6,
+    "style": "pierre", "mur": "#b9ab9f", "toit": "#24366e", "accent": "#4c8cc8",
+    "signature": "ecole"
   },
   {
     "cle": "entreprise", "nom": "L'ENTREPRISE", "section": "Expériences pro",
@@ -14,18 +14,18 @@
     "signature": "entreprise"
   },
   {
-    "cle": "ecole", "nom": "L'ÉCOLE", "section": "Parcours scolaire",
-    "x": -5.6, "z": -8.7, "rotation": 9,
-    "largeur": 7.5, "hauteur": 6.8, "profondeur": 6,
-    "style": "pierre", "mur": "#b9ab9f", "toit": "#24366e", "accent": "#4c8cc8",
-    "signature": "ecole"
-  },
-  {
     "cle": "banque", "nom": "LA BANQUE", "section": "Finance",
-    "x": 5.2, "z": -8.9, "rotation": -9,
+    "x": -5.4, "z": -8.9, "rotation": 9,
     "largeur": 9, "hauteur": 6.4, "profondeur": 6,
     "style": "pierre", "mur": "#e3c389", "toit": "#24503a", "accent": "#3f7a42",
-    "fronton": true, "porteAvance": 2.4, "signature": "banque"
+    "fronton": true, "signature": "banque"
+  },
+  {
+    "cle": "colisee", "nom": "LE COLISÉE", "section": "Sport",
+    "x": 5.6, "z": -9.2, "rotation": -9,
+    "largeur": 8, "hauteur": 5.2, "profondeur": 8,
+    "forme": "ronde", "mur": "#e3c389", "toit": "#96683f", "accent": "#b8324f",
+    "signature": "colisee"
   },
   {
     "cle": "concert", "nom": "LA SALLE DE CONCERT", "section": "Musique",

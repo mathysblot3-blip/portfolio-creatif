@@ -220,6 +220,6 @@ export function creerBatiment(lieu, index) {
   // Point où le perso touche la porte (entrée automatique) et point où il réapparaît en sortant.
   const avance = lieu.signature === 'banque' ? 1.25 : AVANCE_PORTE; // la banque : derrière les colonnes
   const porte = { x: 0, z: facade + avance };
-  const retour = { x: 0, z: facade + (lieu.signature === 'banque' ? 3.3 : 2.1) };
+  const retour = { x: 0, z: facade + (lieu.signature === 'banque' ? 3.4 : 2.4) };
   return { groupe, cliquables, obstacles, porte, retour };
 }

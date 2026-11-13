@@ -58,7 +58,8 @@ let entreeEnCours = null;      // le perso est en train de passer la porte
 const cadrage = { ...CAMERA_INTERIEUR };
 const pieces = new Map();      // pièces déjà construites (on ne les fabrique qu'une fois)
 const visites = new Set();
-const DISTANCE_PORTE = 0.5;    // le perso entre dès qu'il est à cette distance du point de porte
+const DISTANCE_PORTE = 0.85;   // le perso entre dès qu'il est à cette distance du point de porte
+const DISTANCE_REARMEMENT = 1.9; // après une sortie, il faut s'éloigner de la porte d'au moins cette distance pour qu'elle se réactive
 
 // ---------- Entrer dans un lieu, en sortir ----------
 function entrer(porte) {
@@ -238,7 +239,7 @@ function boucle() {
       // Entrée automatique dès que le perso touche une porte
       for (const porte of ville.portes) {
         const d = Math.hypot(porte.x - joueur.position.x, porte.z - joueur.position.z);
-        if (porte === porteDesarmee) { if (d > 1.4) porteDesarmee = null; continue; }
+        if (porte === porteDesarmee) { if (d > DISTANCE_REARMEMENT) porteDesarmee = null; continue; }
         if (d < DISTANCE_PORTE && !transition.enCours()) { entrer(porte); break; }
       }
     }
