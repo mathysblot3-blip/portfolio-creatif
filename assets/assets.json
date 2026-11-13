@@ -18,7 +18,7 @@
   },
   "style": {
     "_lisezmoi": "Préfixe commun ajouté au début de chaque prompt, puis clause de vue selon le type, puis le sujet, puis les interdits. Expliqué dans prompts/bible-style.md",
-    "prefixe": "16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures",
+    "prefixe": "HD-2D art: highly detailed hand-crafted pixel art textures made for a 3D diorama, crisp hard-edged square pixels, rich material detail such as weathered stone, moss in the cracks, worn wood grain and ornate wrought ironwork, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, glinting warm highlights, miniature diorama feel, no outlines on textures",
     "vues": {
       "reference": "slightly elevated three-quarter view, shallow depth of field, soft bloom",
       "tuile": "orthographic and perfectly flat, seen straight on, no perspective, no vignette, no lighting gradient, the pattern fills the whole frame edge to edge and tiles seamlessly",
@@ -27,7 +27,7 @@
       "sprite": "one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground",
       "animation": "a sprite sheet of animation frames on a strict evenly spaced grid, every frame the same size and framing, smooth looping motion",
       "planche": "on a solid flat pure magenta (#FF00FF) background, strict evenly spaced grid, every frame the same size, no cast shadow on the background, no ground",
-      "video": "HD-2D look: pixel art sprites and textures in a softly lit 3D diorama, tilt-shift depth of field, soft bloom, slow and smooth motion"
+      "video": "HD-2D look: highly detailed pixel art sprites and textures in a softly lit 3D miniature diorama, strong tilt-shift depth of field, soft bloom and light glints, floating dust in the sunbeams, slow and smooth motion"
     },
     "interdits": "Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures"
   },

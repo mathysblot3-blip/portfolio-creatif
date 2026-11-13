@@ -14,7 +14,7 @@ Ce document fixe les règles communes à toutes les générations Higgsfield. Le
 
 | Point | Choix |
 |---|---|
-| Esthétique | Pixel art 16 bits façon jeux de rôle HD-2D récents, ville de fantaisie chaleureuse |
+| Esthétique | HD-2D : pixel art très détaillé conçu pour un diorama 3D (pierre usée, mousse, bois patiné, ferronneries), effet maquette, ville de fantaisie chaleureuse. Aucun jeu existant n'est nommé ni copié |
 | Lumière | Fin d'après-midi dorée, soleil **en haut à gauche** (comme dans le jeu : azimut -40°, hauteur 30°) |
 | Ombres | Froides, vers le violet. Lumières chaudes, vers le jaune (principe de la palette) |
 | Palette | Les 48 couleurs de `assets/palette/portfolio-creatif.gpl`. Le script y ramène chaque pixel, sans tramage |
