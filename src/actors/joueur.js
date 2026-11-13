@@ -6,12 +6,21 @@
 // =====================================================================
 import * as THREE from 'three';
 import { creerLutin, imagesPersoProvisoire } from './lutin.js';
+import { decouperPlanche } from '../engine/assets.js';
 
 const VITESSE = 5;          // unités par seconde
 const DUREE_IMAGE = 0.14;   // durée d'une image de marche, en secondes
 
+// Images du perso : la planche générée (assets/ia/perso/marche.png, lignes face, dos, profil) si elle existe,
+// sinon le perso provisoire dessiné par le code.
+function imagesPerso() {
+  const planche = decouperPlanche('perso/marche');
+  if (!planche) return imagesPersoProvisoire();
+  return { face: planche[0], dos: planche[1], profil: planche[2] };
+}
+
 export function creerJoueur(scene, collisionsDepart, navigationDepart) {
-  const images = imagesPersoProvisoire();
+  const images = imagesPerso();
   const lutin = creerLutin(images.face[0]);
   lutin.position.set(0, 0, 6.5);
   scene.add(lutin);

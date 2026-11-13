@@ -19,9 +19,13 @@ import { construireVille } from './world/ville.js';
 import { creerNavigation } from './world/chemin.js';
 import { construirePiece, CAMERA_INTERIEUR, FLOU_INTERIEUR } from './interieur/piece.js';
 import { creerJoueur } from './actors/joueur.js';
+import { creerChat } from './actors/chat.js';
 import { creerHud } from './ui/hud.js';
 import { creerVisionneuse } from './ui/visionneuse.js';
 import { creerTransition } from './ui/transition.js';
+import { creerEcranTitre } from './ui/ecranTitre.js';
+import { creerMusique } from './audio/musique.js';
+import { bilanAssets } from './engine/assets.js';
 
 const toile = document.getElementById('vue');
 const infobulle = document.getElementById('infobulle');
@@ -34,6 +38,7 @@ const post = creerPostTraitement(rendu, sceneVille, cam.camera);
 const ville = construireVille(sceneVille);
 const navigationVille = creerNavigation(ville.collisions);
 const joueur = creerJoueur(sceneVille, ville.collisions, navigationVille);
+const chat = creerChat(sceneVille, ville.fontaine.x + 2.9, ville.fontaine.z + 1.6); // il attend au bord de la fontaine
 const hud = creerHud(ville.lieux.length);
 const visionneuse = creerVisionneuse();
 const transition = creerTransition();
@@ -49,7 +54,10 @@ function toutAppliquer() {
 toutAppliquer();
 
 // ---------- État du jeu ----------
-let mode = 'ville';
+// 'titre' : écran titre (la place sert de fond animé, ou la vidéo générée si elle existe)
+let mode = 'titre';
+let tempsTitre = 0;
+const pointTitre = new THREE.Vector3(0, 0, 3); // point que la caméra suit pendant l'écran titre
 let piece = null;              // lieu dans lequel on se trouve
 let tempsDansPiece = 0;        // secondes depuis l'entrée (pilote l'animation d'entrée)
 let survole = null;            // élément du tableau sous la souris (ou choisi au clavier)
@@ -145,7 +153,7 @@ boutonSortir.addEventListener('click', sortir);
 const touches = new Set();
 addEventListener('keydown', (e) => {
   if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
-  if (transition.enCours()) return;
+  if (transition.enCours() || mode === 'titre') return;
 
   if (mode === 'visionneuse') {
     if (e.code === 'Escape' || e.code === 'Backspace') visionneuse.fermer();
@@ -228,7 +236,15 @@ function boucle() {
   if (innerWidth === 0 || innerHeight === 0) { requestAnimationFrame(boucle); return; }
   const dt = Math.min(horloge.getDelta(), 0.05);
 
-  if (mode === 'ville') {
+  if (mode === 'titre') {
+    // Caméra qui glisse lentement d'un bout à l'autre de la place
+    tempsTitre += dt;
+    pointTitre.x = Math.sin(tempsTitre * 0.06) * 14;
+    cam.suivre(pointTitre, AUCUNE, dt);
+    lumieres.suivre(cam.cible);
+    post.definirMiseAuPoint(cam.profondeurDe(pointTitre));
+    ville.animer(horloge.elapsedTime);
+  } else if (mode === 'ville') {
     let direction = AUCUNE;
     if (entreeEnCours) {
       // Le perso avance dans l'encadrement de la porte
@@ -243,6 +259,7 @@ function boucle() {
         if (d < DISTANCE_PORTE && !transition.enCours()) { entrer(porte); break; }
       }
     }
+    chat.mettreAJour(dt, joueur.position, ville.collisions);
     cam.suivre(joueur.position, direction, dt);
     lumieres.suivre(cam.cible);
     post.definirMiseAuPoint(cam.profondeurDe(joueur.position)); // le perso est toujours net
@@ -253,7 +270,8 @@ function boucle() {
     cam.suivre(joueur.position, AUCUNE, dt, true);
     post.definirMiseAuPoint(cam.profondeurDe(piece.centreTableau)); // le tableau est net, le perso flou
   }
-  post.rendre();
+  // Avec la vidéo de fond, la scène est cachée derrière : inutile de la dessiner.
+  if (!(mode === 'titre' && titre.avecVideo)) post.rendre();
 
   // Compteur d'images par seconde, mis à jour deux fois par seconde
   images++; chrono += dt;
@@ -264,9 +282,26 @@ function boucle() {
   requestAnimationFrame(boucle);
 }
 
-cam.suivre(joueur.position, AUCUNE, 0, true); // place la caméra directement, sans glissement au démarrage
+// ---------- Écran titre, puis entrée sur la place ----------
+const musique = creerMusique();
+joueur.lutin.visible = false; // la place est vide pendant l'écran titre
+const titre = creerEcranTitre({
+  aLEntree: () => {
+    mode = 'ville';
+    joueur.lutin.visible = true;   // la caméra glisse ensuite en douceur jusqu'au perso
+    musique.demarrer();
+    setTimeout(() => hud.notifier('Bienvenue.<br>Chaque bâtiment est une section : marche jusqu\'à sa porte.'), 700);
+  },
+});
+
+cam.suivre(pointTitre, AUCUNE, 0, true); // place la caméra directement, sans glissement au démarrage
 boucle();
-setTimeout(() => hud.notifier('Bienvenue.<br>Chaque bâtiment est une section : marche jusqu\'à sa porte.'), 500);
+
+// En développement : liste des assets générés déjà présents et manquants
+if (import.meta.env.DEV) {
+  const { presents, manquants } = bilanAssets();
+  console.info(`Assets générés : ${presents.length} présents, ${manquants.length} manquants (version provisoire affichée).`);
+}
 
 // Le panneau de réglages n'est chargé qu'en développement (ou avec ?reglages dans l'adresse).
 if (import.meta.env.DEV || new URLSearchParams(location.search).has('reglages')) {
@@ -275,4 +310,4 @@ if (import.meta.env.DEV || new URLSearchParams(location.search).has('reglages'))
 }
 
 // Accès depuis la console du navigateur, pratique pour déboguer.
-window.__portfolio = { REGLAGES, toutAppliquer, joueur, cam, rendu, post, ville, entrer, sortir, regarder, etat: () => ({ mode, piece, tempsDansPiece }) };
+window.__portfolio = { REGLAGES, toutAppliquer, joueur, chat, cam, rendu, post, ville, entrer, sortir, regarder, etat: () => ({ mode, piece, tempsDansPiece }) };

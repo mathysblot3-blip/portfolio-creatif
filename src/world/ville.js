@@ -7,9 +7,25 @@
 import * as THREE from 'three';
 import LIEUX from '../data/places.json';
 import { TEX, textureCiel } from '../engine/textures.js';
+import { textureAsset, textureOu, infoAsset } from '../engine/assets.js';
+import { creerLutin } from '../actors/lutin.js';
 import { boiteDense, planDense, solOvale } from './formes.js';
 import { creerBatiment } from './batiment.js';
 import { creerCollisions } from './collisions.js';
+
+// Arbre ou buisson en image (asset "vegetation/..."), posé debout comme le perso et éclairé comme lui.
+// Renvoie null si l'image n'existe pas encore : la ville garde alors les volumes provisoires.
+function vegetationImage(id) {
+  const texture = textureAsset(id);
+  if (!texture) return null;
+  const [l, h] = infoAsset(id).taille;
+  return (scene, x, z, taille) => {
+    const lutin = creerLutin(texture, l, h);
+    lutin.position.set(x, 0, z);
+    lutin.scale.setScalar(taille);
+    scene.add(lutin);
+  };
+}
 
 const mat = (options) => new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, ...options });
 const enRadians = (degres) => (degres * Math.PI) / 180;
@@ -34,9 +50,9 @@ export function construireVille(scene) {
   scene.background = textureCiel();
 
   // ---------- Sol : herbe partout, grande place pavée ovale ----------
-  const sol = ajouter(planDense(260, 200), mat({ map: TEX.herbe() }), 0, 0, -20, false);
+  const sol = ajouter(planDense(260, 200), mat({ map: textureOu('sol/herbe', TEX.herbe, { repetable: true }) }), 0, 0, -20, false);
   sol.rotation.x = -Math.PI / 2;
-  ajouter(solOvale(30, 15), mat({ map: TEX.paves() }), 0, 0.02, 1, false);
+  ajouter(solOvale(30, 15), mat({ map: textureOu('sol/paves', TEX.paves, { repetable: true }) }), 0, 0.02, 1, false);
 
   // ---------- Les lieux ----------
   LIEUX.forEach((lieu, index) => {
@@ -59,7 +75,7 @@ export function construireVille(scene) {
   });
 
   // ---------- Fontaine centrale ----------
-  const pierreTex = TEX.pierre(); pierreTex.repeat.set(6, 1);
+  const pierreTex = textureOu('materiau/pierre', TEX.pierre, { repetable: true }); pierreTex.repeat.set(6, 1);
   const pierre = mat({ map: pierreTex });
   const xF = 0, zF = 2.5;
   ajouter(new THREE.CylinderGeometry(2.3, 2.5, 0.7, 20), pierre, xF, 0.35, zF);
@@ -87,16 +103,19 @@ export function construireVille(scene) {
   // ---------- Arbres (volumes provisoires, à remplacer par des sprites) ----------
   const tronc = mat({ color: '#4a2e20' });
   const feuillages = { cypres: mat({ map: TEX.feuillage(), color: '#8fb08a' }), automne: mat({ map: TEX.feuillage(), color: '#f0a050' }) };
+  const images = { cypres: vegetationImage('vegetation/cypres'), feuillu: vegetationImage('vegetation/feuillu'), buisson: vegetationImage('vegetation/buisson') };
   const cypres = (x, z, taille = 1) => {
+    collisions.ajouterCercle(x, z, 0.5 * taille);
+    if (images.cypres) return images.cypres(scene, x, z, taille);
     ajouter(new THREE.CylinderGeometry(0.16 * taille, 0.24 * taille, 1.0 * taille, 6), tronc, x, 0.5 * taille, z);
     ajouter(new THREE.ConeGeometry(1.0 * taille, 5.2 * taille, 7), feuillages.cypres, x, 3.4 * taille, z);
-    collisions.ajouterCercle(x, z, 0.5 * taille);
   };
   const feuillu = (x, z, taille = 1) => {
+    collisions.ajouterCercle(x, z, 0.5 * taille);
+    if (images.feuillu) return images.feuillu(scene, x, z, taille);
     ajouter(new THREE.CylinderGeometry(0.22 * taille, 0.32 * taille, 2.2 * taille, 6), tronc, x, 1.1 * taille, z);
     ajouter(new THREE.IcosahedronGeometry(1.7 * taille, 0), feuillages.automne, x, 3.3 * taille, z);
     ajouter(new THREE.IcosahedronGeometry(1.2 * taille, 0), feuillages.automne, x + 0.9 * taille, 2.7 * taille, z + 0.3);
-    collisions.ajouterCercle(x, z, 0.5 * taille);
   };
   // Rideau d'arbres derrière les bâtiments
   for (let x = -44; x <= 44; x += 4) cypres(x + Math.sin(x) * 1.2, -18 + Math.cos(x * 1.7) * 2.5, 1.3 + Math.abs(Math.sin(x * 3)) * 0.6);
@@ -107,7 +126,7 @@ export function construireVille(scene) {
   feuillu(29, -5.5, 1.2);
 
   // ---------- Premier plan : muret, pots et buissons, volontairement flous à l'écran ----------
-  const pierreMuret = TEX.pierre(); pierreMuret.repeat.set(2, 2);
+  const pierreMuret = textureOu('materiau/pierre', TEX.pierre, { repetable: true }); pierreMuret.repeat.set(2, 2);
   const muret = mat({ map: pierreMuret });
   for (let x = -26; x <= 26; x += 4) {
     if (Math.abs(x) < 3) continue; // ouverture au centre, comme une entrée de la place
@@ -115,12 +134,13 @@ export function construireVille(scene) {
     ajouter(boiteDense(0.9, 0.2, 0.9), muret, x, 1.4, 11.4);
     if (x < 26 && Math.abs(x + 2) >= 3) ajouter(boiteDense(3.3, 0.7, 0.35), muret, x + 2, 0.45, 11.4);
   }
-  const bois = TEX.bois(); bois.repeat.set(2, 2);
+  const bois = textureOu('materiau/bois', TEX.bois, { repetable: true }); bois.repeat.set(2, 2);
   [[-7, 13.2], [-6.1, 13.8], [9, 13.5]].forEach(([x, z]) => ajouter(new THREE.CylinderGeometry(0.45, 0.45, 1.1, 10), mat({ map: bois }), x, 0.55, z));
   ajouter(boiteDense(1.3, 1.3, 1.3), mat({ map: bois }), 10.4, 0.65, 14.2);
   // Buissons bas : ils habillent le bas de l'écran sans jamais cacher le perso
   [[-15, 13.6, 1.0], [-13.4, 14.4, 0.8], [15.5, 14, 1.1], [17, 13.4, 0.8], [24, 14, 1.2], [-24, 14.2, 1.1], [1.5, 15.5, 0.9]].forEach(([x, z, t]) => {
-    ajouter(new THREE.IcosahedronGeometry(1.1 * t, 1), feuillages.cypres, x, 0.7 * t, z);
+    if (images.buisson) images.buisson(scene, x, z, t);
+    else ajouter(new THREE.IcosahedronGeometry(1.1 * t, 1), feuillages.cypres, x, 0.7 * t, z);
   });
 
   // ---------- Poussière dorée en suspension ----------

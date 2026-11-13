@@ -4,14 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portfolio Créatif</title>
+  <meta name="description" content="Portfolio de Mathys Blot sous forme de mini-jeu : une petite place de ville en pixel art, où chaque bâtiment est une section.">
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <!-- Aperçu affiché quand on partage le lien (réseaux sociaux, messageries). L'image doit avoir une adresse complète -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Portfolio Créatif de Mathys Blot">
+  <meta property="og:description" content="Un portfolio à explorer comme un petit jeu : chaque bâtiment de la place est une section.">
+  <meta property="og:url" content="https://mathysblot3-blip.github.io/portfolio-creatif/">
+  <meta property="og:image" content="https://mathysblot3-blip.github.io/portfolio-creatif/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Press+Start+2P&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./src/ui/style.css">
 </head>
-<body>
+<body class="en-titre">
   <!-- La scène 3D est dessinée dans cette toile -->
   <canvas id="vue"></canvas>
+
+  <!-- Écran titre (src/ui/ecranTitre.js). Le fond vidéo éventuel est ajouté par le code -->
+  <div id="titre">
+    <div class="t-voile"></div>
+    <div class="t-bloc">
+      <h1>PORTFOLIO CRÉATIF</h1>
+      <p class="t-nom">Mathys Blot</p>
+      <button class="t-entrer">▶ ENTRER</button>
+      <p class="t-aide">TOUT SE FAIT A LA SOURIS</p>
+    </div>
+  </div>
+  <button id="bouton-son" class="cache">♪ MUSIQUE</button>
 
   <!-- Interface posée par-dessus la scène -->
   <div id="cartouche"><b>PORTFOLIO CRÉATIF</b><span id="visites">LIEUX VISITES 0/6</span></div>

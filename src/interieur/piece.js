@@ -14,6 +14,7 @@ import { lireContenu } from '../contenu/lecteur.js';
 import { creerElement, disposerEnVrac } from './elementsMur.js';
 import { creerTableau, creerFixation, creerFil, LARGEUR_TABLEAU, HAUTEUR_TABLEAU } from './tableaux.js';
 import { creerLutin } from '../actors/lutin.js';
+import { textureOu } from '../engine/assets.js';
 
 const Y_TABLEAU = 2.55;          // hauteur du centre du tableau
 const Z_PERSO = 3.3;             // le perso se tient entre la caméra et le tableau
@@ -38,7 +39,8 @@ export function construirePiece(lieu, imageDos) {
   const { groupe: tableau, style } = creerTableau(lieu.cle, graine);
   tableau.position.set(0, Y_TABLEAU, 0);
   scene.add(tableau);
-  const mur = new THREE.Mesh(planDense(22, 10), new THREE.MeshStandardMaterial({ map: style.mur(), roughness: 0.95 }));
+  const textureMur = textureOu(`interieur/${lieu.cle}`, style.mur, { repetable: true }); // asset généré ou texture provisoire
+  const mur = new THREE.Mesh(planDense(22, 10), new THREE.MeshStandardMaterial({ map: textureMur, roughness: 0.95 }));
   mur.position.set(0, 4, -0.1);
   mur.receiveShadow = true;
   scene.add(mur);

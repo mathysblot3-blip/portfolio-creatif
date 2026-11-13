@@ -7,17 +7,31 @@
 // Aucun nom n'est écrit sur les bâtiments : on reconnaît chaque lieu à son allure
 // (clocher de l'école, colonnes et pièce d'or de la banque, néon de la salle de concert...)
 // et à l'écu suspendu qui porte son pictogramme.
-// Les formes et textures sont provisoires : elles seront remplacées par tes dessins.
+// Les textures dessinées par code sont provisoires. Quand un asset existe dans assets/ia/
+// (voir assets/assets.json), il les remplace automatiquement :
+//   facade/<lieu>   image du mur de façade, posée devant le volume. Les détails plats dessinés
+//                   par le code (porte, fenêtres, volets, horloge, affiches, vitrine) sont alors masqués,
+//                   les volumes en relief (clocher, colonnes, auvent, enceintes, écu...) restent.
+//   mur/<style>, toit/tuiles   textures neutres, colorées par les couleurs de places.json
+//   materiau/pierre, materiau/bois
 // =====================================================================
 import * as THREE from 'three';
 import { TEX, nuance } from '../engine/textures.js';
+import { textureAsset, textureOu } from '../engine/assets.js';
 import { PICTO_DU_LIEU } from '../engine/pictos.js';
 import { boiteDense, toitDeuxPans, UNITES_PAR_TUILE } from './formes.js';
 
 const mat = (options) => new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, ...options });
 
-// Les trois styles de mur disponibles dans places.json
+// Les trois styles de mur disponibles dans places.json, et l'asset neutre qui peut les remplacer
 const MURS = { colombage: TEX.mur, pierre: TEX.pierreTaillee, brique: TEX.brique };
+const MURS_ASSET = { colombage: 'mur/colombage', pierre: 'mur/pierre' };
+
+// Matériau "teinté" : l'asset neutre coloré par la couleur du lieu, sinon la texture provisoire déjà colorée.
+function matTeinte(idAsset, couleur, provisoire) {
+  const asset = idAsset ? textureAsset(idAsset, { repetable: true }) : null;
+  return asset ? { map: asset, color: couleur } : { map: provisoire() };
+}
 
 // Distance entre la façade et le point où le perso "touche" la porte (il entre alors tout seul).
 export const AVANCE_PORTE = 0.65;
@@ -26,8 +40,8 @@ export const AVANCE_PORTE = 0.65;
 let commun = null;
 function materiauxCommuns() {
   if (commun) return commun;
-  const pierre = TEX.pierre(); pierre.repeat.set(2, 2);
-  const bois = TEX.bois(); bois.repeat.set(2, 2);
+  const pierre = textureOu('materiau/pierre', TEX.pierre, { repetable: true }); pierre.repeat.set(2, 2);
+  const bois = textureOu('materiau/bois', TEX.bois, { repetable: true }); bois.repeat.set(2, 2);
   commun = {
     pierre: mat({ map: pierre }),
     bois: mat({ map: bois }),
@@ -47,31 +61,35 @@ export function creerBatiment(lieu, index) {
   const cliquables = []; // surfaces sur lesquelles un clic envoie le perso vers la porte
   const obstacles = [];  // petits objets posés devant le bâtiment : { x, z, r } dans le repère du bâtiment
   const picto = PICTO_DU_LIEU[lieu.cle] ?? 'livre';
+  const rond = lieu.forme === 'ronde';
+  const imageFacade = rond ? null : textureAsset(`facade/${lieu.cle}`);
 
-  const poser = (forme, materiau, x, y, z, { ombre = true, clic = true } = {}) => {
+  // detail = true : élément plat dessiné sur la façade, masqué quand l'image de façade existe.
+  const poser = (forme, materiau, x, y, z, { ombre = true, clic = true, detail = false } = {}) => {
     const objet = new THREE.Mesh(forme, materiau);
     objet.position.set(x, y, z);
     objet.castShadow = ombre;
     objet.receiveShadow = true;
+    groupe.add(objet);
+    if (detail && imageFacade) { objet.visible = false; return objet; }
     // Tout le bâtiment est cliquable : un clic y envoie le perso, qui entre en touchant la porte.
     if (clic) { objet.userData.lieu = lieu; cliquables.push(objet); }
-    groupe.add(objet);
     return objet;
   };
   const facade = p / 2; // position de la façade le long de l'axe z
-  const rond = lieu.forme === 'ronde';
 
   // ---------- Volume principal ----------
-  const tuiles = TEX.toit(lieu.toit, 40 + index);
-  tuiles.repeat.set(1 / UNITES_PAR_TUILE, 1 / UNITES_PAR_TUILE);
-  const toit = mat({ map: tuiles });
+  const toit = mat(matTeinte('toit/tuiles', lieu.toit, () => TEX.toit(lieu.toit, 40 + index)));
+  toit.map.repeat.set(1 / UNITES_PAR_TUILE, 1 / UNITES_PAR_TUILE);
   let mur;
 
   if (rond) {
     // Arène circulaire ouverte vers le ciel : façade à arcades, gradins et sable à l'intérieur.
     const r = l / 2, tour = 2 * Math.PI * r;
-    const arcades = TEX.arcades(lieu.mur);
-    arcades.repeat.set(Math.round(tour / 2.2), h / 2.6);
+    const travee = textureAsset('facade/colisee', { repetable: true });
+    const arcades = travee ?? TEX.arcades(lieu.mur);
+    // L'asset est une travée sur toute la hauteur, répétée 7 fois ; la texture provisoire fait 2,2 × 2,6 unités.
+    if (travee) arcades.repeat.set(7, 1); else arcades.repeat.set(Math.round(tour / 2.2), h / 2.6);
     mur = mat({ map: arcades, side: THREE.DoubleSide });
     poser(new THREE.CylinderGeometry(r + 0.2, r + 0.25, 0.5, 32), M.pierre, 0, 0.25, 0);
     poser(new THREE.CylinderGeometry(r, r, h, 32, 1, true), mur, 0, h / 2, 0);
@@ -80,9 +98,11 @@ export function creerBatiment(lieu, index) {
     const sable = poser(new THREE.CircleGeometry(r - 0.6, 32), mat({ map: TEX.sable() }), 0, 0.3, 0, { ombre: false });
     sable.rotation.x = -Math.PI / 2;
   } else {
-    mur = mat({ map: MURS[lieu.style](lieu.mur, 20 + index) });
+    mur = mat(matTeinte(MURS_ASSET[lieu.style], lieu.mur, () => MURS[lieu.style](lieu.mur, 20 + index)));
     poser(boiteDense(l + 0.3, 0.5, p + 0.3), M.pierre, 0, 0.25, 0);     // soubassement en pierre
     poser(boiteDense(l, h, p), mur, 0, h / 2, 0);
+    // Image de façade : posée juste devant le soubassement, elle couvre tout le mur avant.
+    if (imageFacade) poser(new THREE.PlaneGeometry(l, h), mat({ map: imageFacade }), 0, h / 2, facade + 0.16, { ombre: false });
     if (lieu.fronton) {
       // Toit tourné d'un quart de tour : le triangle (fronton) est en façade et déborde au-dessus des colonnes.
       const fronton = poser(toitDeuxPans(p + 2.2, l, 2.4), [M.pierre, toit], 0, h, 1.1);
@@ -93,11 +113,11 @@ export function creerBatiment(lieu, index) {
   }
 
   // ---------- Porte, linteau, lanterne ----------
-  poser(new THREE.PlaneGeometry(1.75, 2.35), M.pierre, 0, 1.175, facade + 0.015, { ombre: false });
-  poser(new THREE.PlaneGeometry(1.25, 2), M.porte, 0, 1, facade + 0.03, { ombre: false });
+  poser(new THREE.PlaneGeometry(1.75, 2.35), M.pierre, 0, 1.175, facade + 0.015, { ombre: false, detail: true });
+  poser(new THREE.PlaneGeometry(1.25, 2), M.porte, 0, 1, facade + 0.03, { ombre: false, detail: true });
   poser(boiteDense(2.2, 0.16, 0.7), M.pierre, 0, 0.08, facade + 0.35);
-  poser(boiteDense(2.1, 0.3, 0.2), M.pierre, 0, 2.5, facade + 0.08);                     // linteau sculpté
-  poser(new THREE.BoxGeometry(0.26, 0.34, 0.2), M.lampe, -1.3, 2.25, facade + 0.12, { ombre: false });
+  poser(boiteDense(2.1, 0.3, 0.2), M.pierre, 0, 2.5, facade + 0.08, { detail: true });     // linteau sculpté
+  poser(new THREE.BoxGeometry(0.26, 0.34, 0.2), M.lampe, -1.3, 2.25, facade + 0.3, { ombre: false });
 
   // ---------- Écu suspendu à une potence, avec le pictogramme du lieu ----------
   const xEcu = rond ? 1.9 : l / 2 - 0.7;
@@ -108,9 +128,9 @@ export function creerBatiment(lieu, index) {
   // ---------- Fenêtres et volets ----------
   const volet = mat({ color: nuance(lieu.accent, 0.55) });
   const fenetre = (x, y) => {
-    poser(new THREE.PlaneGeometry(1, 1.25), M.fenetre, x, y, facade + 0.02, { ombre: false });
-    poser(new THREE.BoxGeometry(1.2, 0.1, 0.18), M.pierre, x, y - 0.68, facade + 0.08);
-    [-1, 1].forEach((cote) => poser(new THREE.BoxGeometry(0.38, 1.25, 0.06), volet, x + cote * 0.72, y, facade + 0.03));
+    poser(new THREE.PlaneGeometry(1, 1.25), M.fenetre, x, y, facade + 0.02, { ombre: false, detail: true });
+    poser(new THREE.BoxGeometry(1.2, 0.1, 0.18), M.pierre, x, y - 0.68, facade + 0.08, { detail: true });
+    [-1, 1].forEach((cote) => poser(new THREE.BoxGeometry(0.38, 1.25, 0.06), volet, x + cote * 0.72, y, facade + 0.03, { detail: true }));
   };
   const xCote = l / 2 - 1.7;
   if (!rond && lieu.signature !== 'atelier') fenetre(-xCote, 1.85); // l'Atelier a une vitrine à cet endroit
@@ -135,8 +155,8 @@ export function creerBatiment(lieu, index) {
     poser(new THREE.CylinderGeometry(0.18, 0.32, 0.45, 10), M.or, 0, yToit + 0.85, 0.3);                    // cloche
     const fleche = poser(new THREE.ConeGeometry(1.15, 1.5, 4), mat({ color: nuance(lieu.toit, 1.1) }), 0, yToit + 2.35, 0);
     fleche.rotation.y = Math.PI / 4;
-    poser(new THREE.PlaneGeometry(1.5, 1.5), mat({ map: TEX.horloge(), alphaTest: 0.5 }), 0, 5.65, facade + 0.03, { ombre: false });
-    [-1, 1].forEach((cote) => poser(boiteDense(0.55, h, 0.35), M.pierre, cote * (l / 2 - 0.27), h / 2, facade + 0.1));
+    poser(new THREE.PlaneGeometry(1.5, 1.5), mat({ map: TEX.horloge(), alphaTest: 0.5 }), 0, 5.65, facade + 0.03, { ombre: false, detail: true });
+    [-1, 1].forEach((cote) => poser(boiteDense(0.55, h, 0.35), M.pierre, cote * (l / 2 - 0.27), h / 2, facade + 0.1, { detail: true }));
     poser(new THREE.CylinderGeometry(0.05, 0.05, 2.2, 6), M.fer, 0, yToit + 4.0, 0);
     const drapeau = poser(new THREE.PlaneGeometry(0.9, 0.55), mat({ color: lieu.accent, side: THREE.DoubleSide }), 0.47, yToit + 4.75, 0);
     drapeau.userData.flotte = true;
@@ -171,7 +191,7 @@ export function creerBatiment(lieu, index) {
     const neon = TEX.pictoSeul('note');
     poser(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshStandardMaterial({ map: neon, emissive: lieu.accent, emissiveMap: neon, emissiveIntensity: 4, alphaTest: 0.5, color: lieu.accent }), 0, 3.55, facade + 0.06, { ombre: false });
     [['#4c8cc8', '#f0c040'], ['#e0507a', '#14101a'], ['#9a62c4', '#a4cf62']].forEach(([fond, motif], i) => {
-      const affiche = poser(new THREE.PlaneGeometry(0.75, 1.0), mat({ map: TEX.affiche(fond, motif, 60 + i) }), xCote - 0.45 + i * 0.85, 1.75 + (i % 2) * 0.15, facade + 0.025, { ombre: false });
+      const affiche = poser(new THREE.PlaneGeometry(0.75, 1.0), mat({ map: TEX.affiche(fond, motif, 60 + i) }), xCote - 0.45 + i * 0.85, 1.75 + (i % 2) * 0.15, facade + 0.025, { ombre: false, detail: true });
       affiche.rotation.z = (i - 1) * 0.06;
     });
     const avant = mat({ map: TEX.enceinte() }), cote = mat({ color: '#14101a' });
@@ -187,7 +207,7 @@ export function creerBatiment(lieu, index) {
   if (lieu.signature === 'atelier') {
     // Grande vitrine avec mannequins, bobine de fil géante, rouleaux de tissu
     const vitrine = TEX.vitrine();
-    poser(new THREE.PlaneGeometry(2.4, 1.8), mat({ map: vitrine, emissive: '#ffffff', emissiveMap: vitrine, emissiveIntensity: 0.25 }), -xCote + 0.3, 1.45, facade + 0.03, { ombre: false });
+    poser(new THREE.PlaneGeometry(2.4, 1.8), mat({ map: vitrine, emissive: '#ffffff', emissiveMap: vitrine, emissiveIntensity: 0.25 }), -xCote + 0.3, 1.45, facade + 0.03, { ombre: false, detail: true });
     ['#9a62c4', '#e0507a', '#4c8cc8'].forEach((couleur, i) => {
       const rouleau = poser(new THREE.CylinderGeometry(0.2, 0.2, 1.3, 8), mat({ color: couleur }), l / 2 - 1.2, 0.2 + i * 0.36, facade + 0.6 + (i % 2) * 0.12);
       rouleau.rotation.z = Math.PI / 2;

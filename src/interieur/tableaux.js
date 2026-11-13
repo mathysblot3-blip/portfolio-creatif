@@ -12,6 +12,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { TEX, texturePixel, alea, nuance } from '../engine/textures.js';
+import { textureAsset } from '../engine/assets.js';
 
 export const LARGEUR_TABLEAU = 7.25, HAUTEUR_TABLEAU = 4.0;
 const PX_L = 232, PX_H = 128; // taille de la texture : 32 px par unité
@@ -102,7 +103,8 @@ function remplir(g, l, h, couleur, amplitude, r, densite = 0.4) {
 export function creerTableau(cle, graine = 7) {
   const style = STYLES_TABLEAU[cle] ?? STYLES_TABLEAU.entreprise;
   const groupe = new THREE.Group();
-  const texture = texturePixel(PX_L, PX_H, (g, l, h) => style.fond(g, l, h, alea(graine)), { repetable: false });
+  // Fond généré (assets/ia/tableau/<lieu>.png) s'il existe, sinon le fond dessiné par le code.
+  const texture = textureAsset(`tableau/${cle}`) ?? texturePixel(PX_L, PX_H, (g, l, h) => style.fond(g, l, h, alea(graine)), { repetable: false });
   const surface = new THREE.Mesh(new THREE.PlaneGeometry(LARGEUR_TABLEAU, HAUTEUR_TABLEAU), new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95 }));
   surface.receiveShadow = true;
   surface.position.z = 0.06;
