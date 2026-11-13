@@ -11,7 +11,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { REGLAGES } from './engine/reglages.js';
-import { creerRendu, plafondPixelRatio } from './engine/rendu.js';
+import { creerRendu, plafondPixelRatio, TACTILE } from './engine/rendu.js';
 import { creerCamera } from './engine/camera.js';
 import { creerLumieres } from './engine/lumieres.js';
 import { creerPostTraitement } from './engine/postTraitement.js';
@@ -41,6 +41,7 @@ const joueur = creerJoueur(sceneVille, ville.collisions, navigationVille);
 const chat = creerChat(sceneVille, ville.fontaine.x + 2.9, ville.fontaine.z + 1.6); // il attend au bord de la fontaine
 const hud = creerHud(ville.lieux.length);
 const visionneuse = creerVisionneuse();
+if (TACTILE) document.querySelector('#visionneuse .v-fermer').textContent = 'FERMER'; // pas de touche Échap au doigt
 const transition = creerTransition();
 
 // Relit tous les réglages et les applique. Appelée au démarrage et à chaque mouvement d'un curseur.

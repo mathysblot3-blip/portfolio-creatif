@@ -7,7 +7,8 @@
 import * as THREE from 'three';
 import LIEUX from '../data/places.json';
 import { TEX, textureCiel } from '../engine/textures.js';
-import { textureAsset, textureOu, infoAsset } from '../engine/assets.js';
+import { textureAsset, textureOu, infoAsset, decouperPlanche } from '../engine/assets.js';
+import { jetProvisoire, maisonsFondProvisoires, tourFondProvisoire } from './decorProvisoire.js';
 import { creerLutin } from '../actors/lutin.js';
 import { boiteDense, planDense, solOvale } from './formes.js';
 import { creerBatiment } from './batiment.js';
@@ -79,13 +80,41 @@ export function construireVille(scene) {
   const pierre = mat({ map: pierreTex });
   const xF = 0, zF = 2.5;
   ajouter(new THREE.CylinderGeometry(2.3, 2.5, 0.7, 20), pierre, xF, 0.35, zF);
-  const eau = ajouter(new THREE.CylinderGeometry(2.0, 2.0, 0.05, 20), mat({ map: TEX.eau(), emissive: '#24366e', emissiveIntensity: 0.3, roughness: 0.3 }), xF, 0.68, zF, false);
-  eau.material.map.repeat.set(2, 2);
+  // Surface de l'eau : animation générée (anime/eau, 4 images en grille 2 × 2) si elle existe, sinon texture qui glisse.
+  const imagesEau = decouperPlanche('anime/eau')?.flat() ?? null;
+  const eau = ajouter(new THREE.CylinderGeometry(2.0, 2.0, 0.05, 20), mat({ map: imagesEau ? imagesEau[0] : TEX.eau(), emissive: '#24366e', emissiveIntensity: 0.3, roughness: 0.3 }), xF, 0.68, zF, false);
+  if (!imagesEau) eau.material.map.repeat.set(2, 2);
   ajouter(new THREE.CylinderGeometry(0.32, 0.5, 2.0, 10), pierre, xF, 1.4, zF);
   ajouter(new THREE.CylinderGeometry(1.0, 0.5, 0.3, 14), pierre, xF, 2.4, zF);
   ajouter(new THREE.CylinderGeometry(0.16, 0.24, 0.8, 8), pierre, xF, 2.9, zF);
   collisions.ajouterCercle(xF, zF, 2.6);
   const fontaine = { x: xF, z: zF };
+
+  // Jet d'eau animé, posé dans la vasque du haut (anime/jet, 4 images, sinon dessiné par le code)
+  const imagesJet = decouperPlanche('anime/jet')?.flat() ?? jetProvisoire();
+  const [lJet, hJet] = infoAsset('anime/jet').case;
+  const jet = creerLutin(imagesJet[0], lJet, hJet);
+  jet.position.set(xF, 2.5, zF + 0.05);
+  jet.castShadow = false;
+  jet.material.emissive = new THREE.Color('#24366e'); // l'eau garde un peu d'éclat même à l'ombre
+  scene.add(jet);
+
+  // ---------- Arrière-plan : maisons et tour aperçues entre les bâtiments ----------
+  const maisons = [textureAsset('fond/maisons-a'), textureAsset('fond/maisons-b')];
+  const maisonsProvisoires = maisonsFondProvisoires();
+  const [lM, hM] = infoAsset('fond/maisons-a').taille;
+  // x, z, variante (0 ou 1), retournée en miroir, échelle
+  [[-20.5, -13, 0, false, 1], [-10.5, -14.5, 1, true, 1.1], [0.2, -15, 0, true, 1.15], [11, -14.5, 1, false, 1.1], [20.5, -13, 0, false, 1]].forEach(([x, z, v, miroir, e]) => {
+    const fond = creerLutin(maisons[v] ?? maisonsProvisoires[v], lM, hM);
+    fond.position.set(x, 0, z);
+    fond.scale.set(miroir ? -e : e, e, e);
+    scene.add(fond);
+  });
+  const [lT, hT] = infoAsset('fond/tour').taille;
+  const tour = creerLutin(textureAsset('fond/tour') ?? tourFondProvisoire(), lT, hT);
+  tour.position.set(-4.5, 0, -19);
+  tour.scale.setScalar(1.2);
+  scene.add(tour);
 
   // ---------- Lampadaires (seules vraies sources de lumière, sans ombre pour rester fluide) ----------
   const fer = mat({ color: '#2b2433' });
@@ -164,7 +193,11 @@ export function construireVille(scene) {
       positions[i * 3] += Math.cos(temps * 0.5 + phases[i]) * 0.003;
     }
     nuage.attributes.position.needsUpdate = true;
-    eau.material.map.offset.set(temps * 0.03, temps * 0.02);
+    // Eau et jet : on change d'image toutes les 0,12 s (animation image par image, comme un dessin animé)
+    const image = Math.floor(temps / 0.12) % 4;
+    if (imagesEau) eau.material.map = imagesEau[image];
+    else eau.material.map.offset.set(temps * 0.03, temps * 0.02);
+    jet.userData.afficher(imagesJet[image]);
     drapeaux.forEach((d, i) => { d.rotation.y = Math.sin(temps * 2.4 + i) * 0.35; });
   }
 

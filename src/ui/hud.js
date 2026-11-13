@@ -4,9 +4,16 @@
 // l'aide des commandes et les notifications. Ces éléments sont du HTML posé par-dessus la scène 3D.
 // =====================================================================
 
+import { TACTILE } from '../engine/rendu.js';
+
 const element = (id) => document.getElementById(id);
 
-const AIDES = {
+// Sur écran tactile, les aides parlent de toucher et ne mentionnent pas le clavier.
+const AIDES = TACTILE ? {
+  ville: 'TOUCHE LE SOL POUR TE DEPLACER<br>MARCHE JUSQU\'A UNE PORTE POUR ENTRER',
+  piece: 'TOUCHE UN ELEMENT POUR L\'AGRANDIR',
+  visionneuse: '',
+} : {
   ville: 'CLIC : SE DEPLACER (OU ZQSD / FLECHES)<br>MARCHE JUSQU\'A UNE PORTE POUR ENTRER',
   piece: 'CLIC SUR UN ELEMENT : L\'AGRANDIR<br>ECHAP : RETOUR A LA PLACE',
   visionneuse: '&lt; &gt; : ELEMENT PRECEDENT / SUIVANT<br>ECHAP : FERMER',

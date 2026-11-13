@@ -9,12 +9,14 @@
 // Pour sauter l'écran titre pendant les essais : ajouter ?direct à l'adresse.
 // =====================================================================
 import { urlAsset } from '../engine/assets.js';
+import { TACTILE } from '../engine/rendu.js';
 
 export function creerEcranTitre({ aLEntree }) {
   const ecran = document.getElementById('titre');
   const bouton = ecran.querySelector('.t-entrer');
   const urlVideo = urlAsset('titre/fond', ['mp4', 'webm']);
   let actif = true;
+  if (TACTILE) ecran.querySelector('.t-aide').textContent = 'TOUT SE FAIT AU DOIGT';
 
   if (urlVideo) {
     // Vidéo muette, en boucle, lue directement dans la page (pas de plein écran sur téléphone).

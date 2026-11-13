@@ -21,7 +21,8 @@ const Z_PERSO = 3.3;             // le perso se tient entre la caméra et le tab
 
 // Cadrage de la caméra : fixe, légèrement en contre-plongée vers le tableau.
 // "visee" négative = la caméra regarde un peu vers le haut.
-export const CAMERA_INTERIEUR = { fov: 30, y: 1.75, z: 9.0, visee: -5, suiviX: 0 };
+// proportionMin : sur un écran plus étroit que 1,6 (fenêtre étroite, téléphone), l'angle s'élargit pour que le tableau tienne en entier.
+export const CAMERA_INTERIEUR = { fov: 30, y: 1.75, z: 9.0, visee: -5, suiviX: 0, proportionMin: 1.6 };
 const RECUL_ENTREE = 3.0;        // la caméra démarre plus loin et avance pendant l'animation d'entrée
 
 // Flou de profondeur des intérieurs : tableau net, perso au premier plan très flou.
@@ -40,8 +41,9 @@ export function construirePiece(lieu, imageDos) {
   tableau.position.set(0, Y_TABLEAU, 0);
   scene.add(tableau);
   const textureMur = textureOu(`interieur/${lieu.cle}`, style.mur, { repetable: true }); // asset généré ou texture provisoire
-  const mur = new THREE.Mesh(planDense(22, 10), new THREE.MeshStandardMaterial({ map: textureMur, roughness: 0.95 }));
-  mur.position.set(0, 4, -0.1);
+  // Mur assez haut pour remplir l'écran même en téléphone tenu en hauteur (angle de vue élargi)
+  const mur = new THREE.Mesh(planDense(22, 18), new THREE.MeshStandardMaterial({ map: textureMur, roughness: 0.95 }));
+  mur.position.set(0, 8, -0.1);
   mur.receiveShadow = true;
   scene.add(mur);
   const sol = new THREE.Mesh(new THREE.PlaneGeometry(22, 12), new THREE.MeshStandardMaterial({ color: '#4a2e20', roughness: 1 }));

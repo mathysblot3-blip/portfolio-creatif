@@ -13,11 +13,12 @@ Règles et explications : `prompts/bible-style.md`. Procédure du jour J : `prom
 | Vue « tuile-teinte » | orthographic and perfectly flat, seen straight on, no perspective, no vignette, no lighting gradient, the pattern fills the whole frame edge to edge and tiles seamlessly, grayscale only |
 | Vue « image » | orthographic front elevation, perfectly flat and straight-on, no perspective, the subject fills the entire frame edge to edge, no sky, no ground, no roof visible |
 | Vue « sprite » | one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground |
+| Vue « animation » | a sprite sheet of animation frames on a strict evenly spaced grid, every frame the same size and framing, smooth looping motion |
 | Vue « planche » | on a solid flat pure magenta (#FF00FF) background, strict evenly spaced grid, every frame the same size, no cast shadow on the background, no ground |
 | Vue « video » | HD-2D look: pixel art sprites and textures in a softly lit 3D diorama, tilt-shift depth of field, soft bloom, slow and smooth motion |
 | Interdits | Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures |
 
-Estimation : **232 générations** pour 44 assets.
+Estimation : **256 générations** pour 49 assets.
 
 ## Ordre de génération
 
@@ -216,6 +217,61 @@ Après chaque asset retenu : `python outils/assets.py traiter <id>`, regarder le
 
 ```
 16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground. a single low round green bush, lit from the upper left. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
+```
+
+### `anime/eau`
+
+- Rôle : Surface de l'eau de la fontaine, 4 images en boucle (une image couvre le bassin de 4 × 4 unités)
+- Statut : **définitif**
+- Proportion : **1:1**, variantes : 6, taille finale : 256×256 px
+- Référence de style : image d’ancrage retenue
+
+```
+16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. a sprite sheet of animation frames on a strict evenly spaced grid, every frame the same size and framing, smooth looping motion. 4 animation frames arranged in a 2 by 2 grid (read left to right, top to bottom) of a calm sparkling blue water surface seen from directly above, gentle ripples and small light glints that move slightly between frames, the 4th frame loops back to the 1st. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
+```
+
+### `anime/jet`
+
+- Rôle : Jet d'eau de la fontaine, 4 images en boucle (2 × 3 unités), posé dans la vasque du haut
+- Statut : **définitif**
+- Proportion : **2:3**, variantes : 6, taille finale : 128×192 px
+- Référence de style : image d’ancrage retenue
+
+```
+16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. a sprite sheet of animation frames on a strict evenly spaced grid, every frame the same size and framing, smooth looping motion. 4 animation frames arranged in a 2 by 2 grid (read left to right, top to bottom) of a small fountain water jet: a thin vertical column of water rising, opening into a crown and falling back down in arcs and droplets on both sides, light blue and white water, each frame slightly different, looping, identical size and position in every frame, on a solid flat pure magenta (#FF00FF) background with no shadow. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
+```
+
+### `fond/maisons-a`
+
+- Rôle : Groupe de trois maisons d'arrière-plan, aperçu entre les bâtiments (8 × 7 unités, placé plusieurs fois, parfois en miroir)
+- Statut : **définitif**
+- Proportion : **1:1**, variantes : 4, taille finale : 256×224 px
+- Référence de style : image d’ancrage retenue
+
+```
+16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground. a row of three narrow tall fantasy town houses side by side, seen straight from the front, half-timbered and plaster walls in cream, ochre and tan, dark red, brown and blue gable roofs, small windows, no doors in close-up, simple and readable. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
+```
+
+### `fond/maisons-b`
+
+- Rôle : Second groupe de maisons d'arrière-plan, pour varier
+- Statut : **définitif**
+- Proportion : **1:1**, variantes : 4, taille finale : 256×224 px
+- Référence de style : image d’ancrage retenue
+
+```
+16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground. a row of three fantasy town houses of different heights side by side, seen straight from the front, stone and plaster walls in peach, light grey and ochre, green, purple and crimson gable roofs, a small chimney, small windows, simple and readable. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
+```
+
+### `fond/tour`
+
+- Rôle : Haute tour de guet aperçue derrière la place (4 × 14 unités)
+- Statut : **définitif**
+- Proportion : **9:16**, variantes : 4, taille finale : 128×448 px
+- Référence de style : image d’ancrage retenue
+
+```
+16-bit pixel art in the style of modern HD-2D JRPGs, crisp hard-edged square pixels, limited warm palette, cozy fantasy town, warm golden late-afternoon sunlight coming from the upper left, soft cool violet shadows, gentle warm highlights, no outlines on textures. one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground. a single tall slender round stone watchtower seen from the front, pale grey stone, a walkway near the top, a pointed dark blue conical roof with a small red pennant on top, a few narrow windows. Avoid: any text, letters, numbers, words, signs with writing, logos, brand marks, signatures, watermarks, user interface, borders, frames around the image, people's faces in close-up, photorealism, blur, gradients on textures.
 ```
 
 ### `perso/marche`

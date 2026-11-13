@@ -58,7 +58,7 @@ PALETTE = [rvb(code) for rampe in RAMPES.values() for code in rampe]
 GRIS = [(v, v, v) for v in (70, 104, 134, 160, 184, 206, 226, 244)]
 
 # Nombre de variantes à demander par type, pour estimer le total de générations.
-VARIANTES = {"reference": 4, "tuile": 4, "tuile-teinte": 4, "image": 4, "sprite": 4, "planche": 6, "video": 3}
+VARIANTES = {"reference": 4, "tuile": 4, "tuile-teinte": 4, "image": 4, "sprite": 4, "planche": 6, "animation": 6, "video": 3}
 # Écart de proportion toléré avant de recadrer au lieu d'étirer (8 %).
 TOLERANCE_ETIREMENT = 0.08
 
@@ -109,7 +109,8 @@ def prompt_complet(catalogue: dict, asset: dict) -> str:
 # Commande "liste" : ASSETS_A_FAIRE.md et prompts/higgsfield.md
 # ---------------------------------------------------------------------------------------------
 FOND = {"reference": "opaque", "tuile": "opaque, sans raccord", "tuile-teinte": "opaque, gris, sans raccord",
-        "image": "opaque", "sprite": "magenta à détourer", "planche": "magenta à détourer", "video": "opaque"}
+        "image": "opaque", "sprite": "magenta à détourer", "planche": "magenta à détourer",
+        "animation": "selon l'asset (opaque ou magenta)", "video": "opaque"}
 
 
 def commande_liste() -> None:
@@ -368,6 +369,10 @@ def traiter_image(asset: dict, brut: Image.Image) -> Image.Image:
         return alpha_net(quantifier(poser_en_bas(detourer(brut), largeur, hauteur), PALETTE))
     if t == "planche":
         return traiter_planche(asset, detourer(brut))
+    if t == "animation":
+        if asset.get("fond") == "magenta":
+            return traiter_planche(asset, detourer(brut))
+        return traiter_animation_opaque(asset, brut.convert("RGB"))
     raise SystemExit(f"Type « {t} » : pas de traitement d'image (référence ou vidéo).")
 
 
@@ -397,6 +402,21 @@ def traiter_planche(asset: dict, image: Image.Image) -> Image.Image:
     return alpha_net(quantifier(planche, PALETTE))
 
 
+def traiter_animation_opaque(asset: dict, image: Image.Image) -> Image.Image:
+    """Animation sans transparence (eau vue de dessus) : chaque case est réduite à la taille exacte,
+    puis toutes les cases sont ramenées à la palette ensemble, pour qu'elles partagent les mêmes couleurs."""
+    colonnes, lignes = asset["grille"]
+    cl, ch = asset["case"]
+    image = recadrer_proportion(image, colonnes * cl, lignes * ch)
+    pl, ph = image.width / colonnes, image.height / lignes
+    planche = Image.new("RGB", (colonnes * cl, lignes * ch))
+    for y in range(lignes):
+        for x in range(colonnes):
+            case = image.crop((round(x * pl), round(y * ph), round((x + 1) * pl), round((y + 1) * ph)))
+            planche.paste(reduire(case, cl, ch), (x * cl, y * ch))
+    return quantifier(planche, PALETTE)
+
+
 def traiter_video(asset: dict, brut: Path, sortie: Path) -> None:
     """Compresse la vidéo pour le web : 1280 × 720, H.264, sans son, démarrage rapide. Nécessite ffmpeg."""
     if not shutil.which("ffmpeg"):
@@ -421,7 +441,7 @@ def controler(asset: dict, image: Image.Image) -> list[str]:
     hors = {tuple(int(c) for c in p[:3]) for p in np.unique(pixels[pixels[:, 3] > 0], axis=0)} - attendu
     if hors:
         problemes.append(f"{len(hors)} couleurs hors palette")
-    if asset["type"] in ("sprite", "planche"):
+    if asset["type"] in ("sprite", "planche") or (asset["type"] == "animation" and asset.get("fond") == "magenta"):
         alphas = set(np.unique(pixels[:, 3]).tolist())
         if not alphas <= {0, 255}:
             problemes.append("transparence partielle (doit être tout ou rien)")
@@ -541,7 +561,7 @@ def commande_etat() -> None:
 # ---------------------------------------------------------------------------------------------
 # Commande "essai" : test à blanc avec de fausses images brutes
 # ---------------------------------------------------------------------------------------------
-ESSAIS = ["sol/paves", "mur/colombage", "facade/ecole", "vegetation/cypres", "perso/marche", "tableau/banque"]
+ESSAIS = ["sol/paves", "mur/colombage", "facade/ecole", "vegetation/cypres", "perso/marche", "tableau/banque", "anime/eau", "anime/jet"]
 
 
 def faux_pixel_art(largeur: int, hauteur: int, gros_pixel: int, couleurs, graine: int) -> np.ndarray:
@@ -574,6 +594,16 @@ def fabriquer_brut(identifiant: str) -> Image.Image:
         d.polygon([(384, 120), (520, 1180), (248, 1180)], fill=(63, 107, 58))
         # Bord adouci comme le ferait un modèle : le vert déborde sur le magenta
         return im.resize((384, 682), Image.Resampling.BILINEAR).resize((768, 1365), Image.Resampling.BILINEAR)
+    if identifiant == "anime/eau":
+        return Image.fromarray(faux_pixel_art(1024, 1024, 16, [(47, 90, 158), (76, 140, 200), (134, 192, 228)], 3).astype(np.uint8))
+    if identifiant == "anime/jet":
+        im = Image.new("RGB", (768, 1152), (255, 0, 255))
+        d = ImageDraw.Draw(im)
+        for i in range(4):
+            cx, base = (i % 2) * 384 + 192, (i // 2) * 576 + 560
+            d.rectangle([cx - 12, base - 420 + i * 10, cx + 12, base], fill=(134, 192, 228))
+            d.ellipse([cx - 90, base - 460 + i * 10, cx + 90, base - 380 + i * 10], fill=(200, 232, 244))
+        return im
     if identifiant == "perso/marche":
         im = Image.new("RGB", (1024, 1152), (255, 0, 255))
         d = ImageDraw.Draw(im)

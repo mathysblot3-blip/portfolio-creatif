@@ -21,7 +21,11 @@ export function creerRendu(toile) {
   return rendu;
 }
 
+// Écran tactile (téléphone, tablette) : sert à adapter les aides et à alléger le rendu.
+export const TACTILE = matchMedia('(pointer: coarse)').matches;
+
 // Plafond du "pixel ratio" : sur un écran très dense, on ne calcule pas tous les pixels pour rester fluide.
+// Sur téléphone, l'écran est petit et très dense : 1 suffit et divise le travail de la carte graphique par 4 à 9.
 export function plafondPixelRatio(qualite) {
-  return Math.min(window.devicePixelRatio || 1, qualite === 'haute' ? 1.5 : 1);
+  return Math.min(window.devicePixelRatio || 1, qualite === 'haute' && !TACTILE ? 1.5 : 1);
 }

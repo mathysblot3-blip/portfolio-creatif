@@ -25,6 +25,7 @@
       "tuile-teinte": "orthographic and perfectly flat, seen straight on, no perspective, no vignette, no lighting gradient, the pattern fills the whole frame edge to edge and tiles seamlessly, grayscale only",
       "image": "orthographic front elevation, perfectly flat and straight-on, no perspective, the subject fills the entire frame edge to edge, no sky, no ground, no roof visible",
       "sprite": "one single isolated object, centered, fully visible with a small margin, side view with a very slight top-down angle, on a solid flat pure magenta (#FF00FF) background, no cast shadow on the background, no ground",
+      "animation": "a sprite sheet of animation frames on a strict evenly spaced grid, every frame the same size and framing, smooth looping motion",
       "planche": "on a solid flat pure magenta (#FF00FF) background, strict evenly spaced grid, every frame the same size, no cast shadow on the background, no ground",
       "video": "HD-2D look: pixel art sprites and textures in a softly lit 3D diorama, tilt-shift depth of field, soft bloom, slow and smooth motion"
     },
@@ -37,6 +38,7 @@
     "image": "Image opaque à la taille exacte (étirée de quelques pour cent si la proportion diffère)",
     "sprite": "Objet détouré sur fond transparent, ajusté pour tenir dans la taille donnée",
     "planche": "Planche de sprites en grille (colonnes × lignes), chaque case détourée",
+    "animation": "Images d'une animation en grille, opaques ou sur fond magenta selon le champ fond",
     "video": "Vidéo en boucle, sans aucun texte"
   },
   "assets": [
@@ -97,6 +99,23 @@
     { "id": "vegetation/buisson", "type": "sprite", "priorite": "P1", "ratio": "3:2", "taille": [80, 52], "vue": "face",
       "role": "Buisson bas du premier plan (2,5 × 1,6 unités)",
       "sujet": "a single low round green bush, lit from the upper left" },
+
+    { "id": "anime/eau", "type": "animation", "fond": "opaque", "priorite": "P1", "ratio": "1:1", "taille": [256, 256], "grille": [2, 2], "case": [128, 128], "vue": "dessus",
+      "role": "Surface de l'eau de la fontaine, 4 images en boucle (une image couvre le bassin de 4 × 4 unités)",
+      "sujet": "4 animation frames arranged in a 2 by 2 grid (read left to right, top to bottom) of a calm sparkling blue water surface seen from directly above, gentle ripples and small light glints that move slightly between frames, the 4th frame loops back to the 1st" },
+    { "id": "anime/jet", "type": "animation", "fond": "magenta", "priorite": "P1", "ratio": "2:3", "taille": [128, 192], "grille": [2, 2], "case": [64, 96], "vue": "face",
+      "role": "Jet d'eau de la fontaine, 4 images en boucle (2 × 3 unités), posé dans la vasque du haut",
+      "sujet": "4 animation frames arranged in a 2 by 2 grid (read left to right, top to bottom) of a small fountain water jet: a thin vertical column of water rising, opening into a crown and falling back down in arcs and droplets on both sides, light blue and white water, each frame slightly different, looping, identical size and position in every frame, on a solid flat pure magenta (#FF00FF) background with no shadow" },
+
+    { "id": "fond/maisons-a", "type": "sprite", "priorite": "P1", "ratio": "1:1", "taille": [256, 224], "vue": "face",
+      "role": "Groupe de trois maisons d'arrière-plan, aperçu entre les bâtiments (8 × 7 unités, placé plusieurs fois, parfois en miroir)",
+      "sujet": "a row of three narrow tall fantasy town houses side by side, seen straight from the front, half-timbered and plaster walls in cream, ochre and tan, dark red, brown and blue gable roofs, small windows, no doors in close-up, simple and readable" },
+    { "id": "fond/maisons-b", "type": "sprite", "priorite": "P1", "ratio": "1:1", "taille": [256, 224], "vue": "face",
+      "role": "Second groupe de maisons d'arrière-plan, pour varier",
+      "sujet": "a row of three fantasy town houses of different heights side by side, seen straight from the front, stone and plaster walls in peach, light grey and ochre, green, purple and crimson gable roofs, a small chimney, small windows, simple and readable" },
+    { "id": "fond/tour", "type": "sprite", "priorite": "P1", "ratio": "9:16", "taille": [128, 448], "vue": "face",
+      "role": "Haute tour de guet aperçue derrière la place (4 × 14 unités)",
+      "sujet": "a single tall slender round stone watchtower seen from the front, pale grey stone, a walkway near the top, a pointed dark blue conical roof with a small red pennant on top, a few narrow windows" },
 
     { "id": "perso/marche", "type": "planche", "priorite": "P1", "ratio": "1:1", "taille": [128, 144], "grille": [4, 3], "case": [32, 48], "vue": "face",
       "role": "Perso jouable : 4 images de marche × 3 directions (ligne 1 face, ligne 2 dos, ligne 3 profil droit). Le profil gauche est le miroir",

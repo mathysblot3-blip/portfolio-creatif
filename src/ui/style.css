@@ -19,7 +19,8 @@ html, body {
   font-family: var(--texte);
 }
 
-canvas#vue { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: pointer; }
+canvas#vue { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: pointer; touch-action: none; /* pas de défilement ni de zoom au doigt sur la scène */ }
+button, a { touch-action: manipulation; } /* pas de délai de double-tap sur téléphone */
 
 .cache { display: none !important; }
 
@@ -173,3 +174,31 @@ body.en-titre #cartouche, body.en-titre #aide, body.en-titre #compteur, body.en-
   box-shadow: 4px 4px 0 var(--accent);
 }
 #bouton-son.coupe { opacity: .6; box-shadow: none; }
+
+/* ---------- Téléphone et fenêtres étroites ---------- */
+@media (max-width: 700px) {
+  #cartouche { top: 12px; padding: 8px 24px 8px 14px; }
+  #cartouche b { font-size: 21px; }
+  #cartouche span { font-size: 7px; }
+  #compteur { top: 74px; left: 14px; }
+  #aide { left: 14px; right: 14px; bottom: 14px; font-size: 7px; }
+  #bouton-sortir { right: 14px; bottom: 56px; }
+  #bouton-son { right: 14px; top: 12px; font-size: 8px; padding: 8px 10px; }
+  #notification { top: 76px; font-size: 9px; max-width: 92vw; }
+  #infobulle { display: none; } /* pas de survol au doigt */
+
+  /* Visionneuse : titre en haut, contenu en dessous, boutons en bas */
+  #visionneuse .b1 { left: -30vw; width: 60vw; }
+  #visionneuse .b2 { left: 32vw; width: 3vw; }
+  #visionneuse .v-tete { left: 5vw; right: 5vw; top: 3vh; width: auto; }
+  #visionneuse .v-titre { font-size: clamp(28px, 9vw, 44px); margin: 10px 0 8px; }
+  #visionneuse .v-titre.long { font-size: clamp(22px, 7vw, 34px); }
+  #visionneuse .v-corps { left: 4vw; right: 4vw; top: 24vh; bottom: 11vh; clip-path: none; padding: 16px; }
+  #visionneuse .v-media img, #visionneuse .v-media video { max-height: 36vh; }
+  #visionneuse .a-fournir { height: 26vh; }
+  #visionneuse .v-texte { font-size: 15px; }
+  #visionneuse .v-prec, #visionneuse .v-suiv, #visionneuse .v-fermer { bottom: 3vh; padding: 12px 16px; }
+  #visionneuse .v-prec { left: 4vw; }
+  #visionneuse .v-suiv { left: calc(4vw + 70px); }
+  #visionneuse .v-fermer { right: 4vw; }
+}

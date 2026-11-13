@@ -9,6 +9,16 @@ import { REGLAGES } from './reglages.js';
 
 const enRadians = (degres) => (degres * Math.PI) / 180;
 
+// Écran plus étroit que cette proportion (téléphone tenu en hauteur, fenêtre étroite) :
+// on élargit l'angle de vue pour garder assez de largeur visible.
+const PROPORTION_MIN_VILLE = 0.8;
+
+// Angle vertical qui montre au moins la largeur qu'aurait un écran de proportion "proportionMin".
+function angleAdapte(fov, proportion, proportionMin) {
+  if (!proportionMin || proportion >= proportionMin) return fov;
+  return (2 * Math.atan(Math.tan(enRadians(fov) / 2) * proportionMin / proportion) * 180) / Math.PI;
+}
+
 export function creerCamera() {
   const R = REGLAGES.camera;
   const camera = new THREE.PerspectiveCamera(R.fov, innerWidth / innerHeight, 4, 400);
@@ -17,7 +27,7 @@ export function creerCamera() {
   let fixe = null;                    // cadrage fixe d'une pièce, ou null dans la ville
 
   function appliquerReglages() {
-    camera.fov = fixe ? fixe.fov : R.fov;
+    camera.fov = fixe ? angleAdapte(fixe.fov, camera.aspect, fixe.proportionMin) : angleAdapte(R.fov, camera.aspect, PROPORTION_MIN_VILLE);
     camera.near = fixe ? 1 : 4;
     camera.updateProjectionMatrix();
   }
@@ -56,7 +66,7 @@ export function creerCamera() {
 
   function redimensionner() {
     camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
+    appliquerReglages(); // l'angle de vue dépend de la proportion de l'écran
   }
 
   // Distance entre la caméra et un point, mesurée dans l'axe de visée (sert à la mise au point du flou).
